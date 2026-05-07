@@ -25,7 +25,7 @@ Nessuna installazione. Funziona nel browser. Funziona offline.
 
 ---
 
-## ✨ Cosa contiene BioSpecInfo
+## ✨ Cosa contiene
 
 | Sezione | Contenuto |
 |---|---|
@@ -37,36 +37,27 @@ Nessuna installazione. Funziona nel browser. Funziona offline.
 | 📊 Spettroscopia | IR, ¹H NMR, ¹³C NMR, MS, UV-Vis |
 | 💊 Farmaci | 143 farmaci con MOA e info cliniche |
 | 🧬 Biochimica | 1050+ biomolecole, 35 biosintesi animate |
-| 🏆 Quiz | 473 domande, spaced repetition SM-2 |
-| 🎓 Esami | 21 simulazioni calibrate su UniBA Chimica |
-| 📚 Percorsi Studio | 20 corsi del triennio UniBA |
-| 📖 Teoria | Concetti chiave per tutti i corsi |
-| 🌐 Risorse | 31 link a database e siti scientifici |
-| 🗺️ Mappa Concettuale | 35 nodi navigabili |
-| 📊 Diagrammi Energetici | 9 profili di reazione interattivi |
+| 🏆 Quiz | 473 domande con spaced repetition SM-2 |
+| 🎓 Esami | 21 simulazioni con timer e voto /30 |
+| 📚 Percorsi Studio | 20 corsi di Chimica |
+| 📖 Teoria | Concetti chiave per ogni materia |
+| 🌐 Risorse | 31 link a database scientifici |
 
 ---
 
 ## 🛠️ Caratteristiche Tecniche
 
 - **Un solo file HTML** (~1.9 MB) — zero dipendenze esterne
-- **Funziona offline** dopo il primo accesso (Service Worker)
-- **Nessun server** — tutti i dati sono locali
-- **Responsive** — ottimizzato per mobile e desktop
-- **Pro sempre attivo** per l'autore
+- **Offline** — funziona senza connessione dopo il primo accesso
+- **Nessun server** — tutti i dati sono locali nel browser
+- **PWA** — installabile come app su Android, iOS e Desktop
 
 ---
-
 
 ## ⚖️ Licenza
 
-**Creative Commons BY-NC 4.0** — Uso libero con attribuzione, vietato uso commerciale senza autorizzazione.
+**CC BY-NC 4.0** — Uso libero con attribuzione, vietato uso commerciale.
 
-Vedi [LICENSE.md](LICENSE.md) per i dettagli.
+> Samuele (2025). *BioSpecInfo*. https://samupropio1-ship-it.github.io/BioSpecInfo-/
 
-**Citazione:**
-> Samuele (2025). *BioSpecInfo — Piattaforma web interattiva di chimica*. Università degli Studi di Bari Aldo Moro. https://samupropio1-ship-it.github.io/BioSpecInfo-/
-
----
-
-*© 2025 Samuele — Università degli Studi di Bari Aldo Moro*
+*© 2025 Samuele*
