@@ -663,7 +663,7 @@ input::placeholder, textarea::placeholder { color: #888888; }
       </svg>
       <div class="logo-text">
         <div class="logo-name">BioSpecInfo</div>
-        <div class="logo-sub">MOLECULAR · SPECTRAL · DASHBOARD · v8.0</div>
+        <div class="logo-sub">MOLECULAR · SPECTRAL · DASHBOARD · V8.0</div>
       </div>
     </div>
     <button class="btn" id="shareBtn">🔗 Condividi</button>
@@ -19950,6 +19950,463 @@ window.initTheory = function(){
 
 console.log('Teoria espansa. Argomenti totali: ' + Object.values(THEORY_DATA).reduce(function(s,d){return s+d.argomenti.length;},0));
 });
+
+</script>
+<div id="snotes" class="section"></div>
+<div id="sstats" class="section"></div>
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// MIGLIORAMENTI: Note Personali + Statistiche Quiz + Farmaci extra
+// ═══════════════════════════════════════════════════════════════════
+(function(){
+'use strict';
+
+// ── NOTE PERSONALI ────────────────────────────────────────────────
+window.initNotes = function(){
+  var sec = document.getElementById('snotes');
+  if(!sec) return;
+  if(sec._built) return;
+  sec._built = true;
+
+  var notes = JSON.parse(localStorage.getItem('bsi_notes') || '[]');
+  var categories = ['Chimica Generale','Chimica Organica','Chimica Fisica','Analitica','Biochimica','Spettroscopia','Altro'];
+
+  function renderNotes(){
+    var filter = document.getElementById('notes-filter') ? document.getElementById('notes-filter').value : 'all';
+    var search = document.getElementById('notes-search') ? document.getElementById('notes-search').value.toLowerCase() : '';
+    var filtered = notes.filter(function(n){
+      var catOk = filter==='all' || n.cat===filter;
+      var searchOk = !search || n.title.toLowerCase().includes(search) || n.body.toLowerCase().includes(search);
+      return catOk && searchOk;
+    });
+    var list = document.getElementById('notes-list');
+    if(!list) return;
+    if(!filtered.length){
+      list.innerHTML='<div style="text-align:center;padding:40px;color:#9ca3af">Nessuna nota. Creane una!</div>';
+      return;
+    }
+    list.innerHTML = filtered.map(function(n,i){
+      var realIdx = notes.indexOf(n);
+      return '<div style="background:#fff;border:2px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:10px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'
+        +'<div>'
+        +'<span style="font-weight:700;font-size:13px">'+n.title+'</span>'
+        +'<span style="background:#E8F5E9;color:#1B5E20;font-size:10px;padding:2px 8px;border-radius:6px;margin-left:8px">'+n.cat+'</span>'
+        +'</div>'
+        +'<div style="display:flex;gap:6px">'
+        +'<button onclick="editNote('+realIdx+')" style="background:#f3f4f6;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer">✏️</button>'
+        +'<button onclick="deleteNote('+realIdx+')" style="background:#FEE2E2;color:#DC2626;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer">🗑️</button>'
+        +'</div>'
+        +'</div>'
+        +'<div style="font-size:12px;color:#374151;white-space:pre-wrap;line-height:1.6">'+n.body+'</div>'
+        +'<div style="font-size:10px;color:#9ca3af;margin-top:6px">'+n.date+'</div>'
+        +'</div>';
+    }).join('');
+  }
+
+  sec.innerHTML = '<div style="max-width:800px;margin:0 auto;padding:20px">'
+    +'<div style="text-align:center;margin-bottom:20px">'
+    +'<div style="font-size:32px">📝</div>'
+    +'<h2 style="color:#1B5E20;margin:6px 0 4px">Le Mie Note</h2>'
+    +'<p style="color:#6b7280;font-size:12px;margin:0">Appunti personali salvati nel browser</p>'
+    +'</div>'
+    // Toolbar
+    +'<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">'
+    +'<input id="notes-search" type="text" placeholder="Cerca nelle note..." oninput="renderNotesView()" '
+    +'style="flex:1;min-width:150px;padding:8px 12px;border:2px solid #e5e7eb;border-radius:10px;font-size:13px">'
+    +'<select id="notes-filter" onchange="renderNotesView()" style="padding:8px 12px;border:2px solid #e5e7eb;border-radius:10px;font-size:13px">'
+    +'<option value="all">Tutte le categorie</option>'
+    +categories.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('')
+    +'</select>'
+    +'<button onclick="openNewNote()" style="background:#1B5E20;color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer">+ Nuova Nota</button>'
+    +'</div>'
+    +'<div id="notes-list"></div>'
+    +'</div>';
+
+  renderNotes();
+
+  window.renderNotesView = renderNotes;
+
+  window.openNewNote = function(idx){
+    var note = idx!==undefined ? notes[idx] : {title:'',body:'',cat:'Altro'};
+    var overlay = document.createElement('div');
+    overlay.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding:20px;box-sizing:border-box;overflow-y:auto;padding-top:40px';
+    overlay.innerHTML='<div style="background:#fff;border-radius:20px;padding:24px;max-width:600px;width:100%">'
+      +'<h3 style="margin:0 0 16px;color:#1B5E20">'+(idx!==undefined?'Modifica':'Nuova')+' Nota</h3>'
+      +'<input id="note-title" type="text" placeholder="Titolo..." value="'+note.title.replace(/"/g,'&quot;')+'" '
+      +'style="width:100%;padding:10px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;margin-bottom:10px;box-sizing:border-box">'
+      +'<select id="note-cat" style="width:100%;padding:10px;border:2px solid #e5e7eb;border-radius:10px;font-size:13px;margin-bottom:10px">'
+      +categories.map(function(c){return '<option value="'+c+'"'+(note.cat===c?' selected':'')+'>'+c+'</option>';}).join('')
+      +'</select>'
+      +'<textarea id="note-body" placeholder="Scrivi la tua nota..." '
+      +'style="width:100%;height:200px;padding:10px;border:2px solid #e5e7eb;border-radius:10px;font-size:13px;resize:vertical;box-sizing:border-box;font-family:inherit">'+note.body+'</textarea>'
+      +'<div style="display:flex;gap:8px;margin-top:12px">'
+      +'<button onclick="saveNote('+(idx!==undefined?idx:'undefined')+')" style="flex:1;background:#1B5E20;color:#fff;border:none;border-radius:10px;padding:10px;font-size:14px;font-weight:700;cursor:pointer">Salva</button>'
+      +'<button onclick="this.closest(\'[style*=position:fixed]\').remove()" style="background:#f3f4f6;border:none;border-radius:10px;padding:10px 20px;font-size:14px;cursor:pointer">Annulla</button>'
+      +'</div></div>';
+    document.body.appendChild(overlay);
+  };
+
+  window.editNote = window.openNewNote;
+
+  window.saveNote = function(idx){
+    var title = document.getElementById('note-title').value.trim();
+    var body = document.getElementById('note-body').value.trim();
+    var cat = document.getElementById('note-cat').value;
+    if(!title && !body) return;
+    var note = {title:title||'(senza titolo)',body:body,cat:cat,date:new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})};
+    if(idx!==undefined && notes[idx]) notes[idx]=note;
+    else notes.unshift(note);
+    localStorage.setItem('bsi_notes', JSON.stringify(notes));
+    document.querySelector('[style*="position:fixed"]').remove();
+    renderNotes();
+  };
+
+  window.deleteNote = function(idx){
+    if(!confirm('Eliminare questa nota?')) return;
+    notes.splice(idx,1);
+    localStorage.setItem('bsi_notes',JSON.stringify(notes));
+    renderNotes();
+  };
+};
+
+// ── STATISTICHE QUIZ ─────────────────────────────────────────────
+window.initStats = function(){
+  var sec = document.getElementById('sstats');
+  if(!sec) return;
+  if(sec._built) return;
+  sec._built = true;
+
+  // Read quiz data from localStorage
+  var sm2 = JSON.parse(localStorage.getItem('bsi_sm2') || '{}');
+  var history = JSON.parse(localStorage.getItem('bsi_quiz_history') || '[]');
+  var keys = Object.keys(sm2);
+  var totalCards = keys.length;
+
+  if(!totalCards){
+    sec.innerHTML='<div style="max-width:700px;margin:0 auto;padding:40px;text-align:center">'
+      +'<div style="font-size:48px;margin-bottom:16px">📊</div>'
+      +'<h2 style="color:#1B5E20">Statistiche Quiz</h2>'
+      +'<p style="color:#6b7280">Inizia a fare quiz per vedere le tue statistiche!</p>'
+      +'</div>';
+    return;
+  }
+
+  // Calculate stats
+  var totalReps = keys.reduce(function(s,k){return s+(sm2[k].reps||0);},0);
+  var avgEF = keys.reduce(function(s,k){return s+(sm2[k].ef||2.5);},0)/totalCards;
+  var due = keys.filter(function(k){return !sm2[k].next||new Date(sm2[k].next)<=new Date();}).length;
+  var mastered = keys.filter(function(k){return (sm2[k].ef||2.5)>=3.0&&(sm2[k].reps||0)>=5;}).length;
+  var difficult = keys.filter(function(k){return (sm2[k].ef||2.5)<2.0;}).length;
+
+  // Category breakdown
+  var catStats = {};
+  keys.forEach(function(k){
+    var cat = k.split('_')[0] || 'altro';
+    if(!catStats[cat]) catStats[cat]={total:0,mastered:0};
+    catStats[cat].total++;
+    if((sm2[k].ef||2.5)>=2.8&&(sm2[k].reps||0)>=3) catStats[cat].mastered++;
+  });
+
+  var topCats = Object.keys(catStats).sort(function(a,b){return catStats[b].total-catStats[a].total;}).slice(0,8);
+
+  sec.innerHTML='<div style="max-width:800px;margin:0 auto;padding:20px">'
+    +'<div style="text-align:center;margin-bottom:20px">'
+    +'<div style="font-size:32px">📊</div>'
+    +'<h2 style="color:#1B5E20;margin:6px 0 4px">Le Tue Statistiche</h2>'
+    +'<p style="color:#6b7280;font-size:12px;margin:0">Progresso quiz con Spaced Repetition SM-2</p>'
+    +'</div>'
+    // Summary cards
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:20px">'
+    +[
+      {n:totalCards,l:'Domande studiate',c:'#1B5E20',i:'🏆'},
+      {n:totalReps,l:'Ripetizioni totali',c:'#1565C0',i:'🔄'},
+      {n:due,l:'Da ripassare oggi',c:'#DC2626',i:'⏰'},
+      {n:mastered,l:'Domande padroneggiate',c:'#2E7D32',i:'⭐'},
+      {n:difficult,l:'Difficili (da rivedere)',c:'#D97706',i:'⚠️'},
+      {n:Math.round(avgEF*100)/100,l:'E-Factor medio',c:'#6A1B9A',i:'📈'},
+    ].map(function(s){
+      return '<div style="background:#fff;border:2px solid #e5e7eb;border-radius:12px;padding:14px;text-align:center">'
+        +'<div style="font-size:24px">'+s.i+'</div>'
+        +'<div style="font-size:24px;font-weight:800;color:'+s.c+'">'+s.n+'</div>'
+        +'<div style="font-size:11px;color:#6b7280">'+s.l+'</div>'
+        +'</div>';
+    }).join('')
+    +'</div>'
+    // Progress bar overall
+    +'<div style="background:#fff;border-radius:12px;padding:16px;margin-bottom:16px;border:2px solid #e5e7eb">'
+    +'<div style="font-weight:700;margin-bottom:8px;font-size:13px">Progresso globale</div>'
+    +'<div style="background:#f3f4f6;border-radius:8px;height:20px;overflow:hidden">'
+    +'<div style="background:linear-gradient(90deg,#1B5E20,#4CAF50);height:100%;border-radius:8px;width:'+Math.min(100,Math.round(mastered/totalCards*100))+'%;transition:width .5s"></div>'
+    +'</div>'
+    +'<div style="font-size:12px;color:#6b7280;margin-top:4px">'+mastered+' / '+totalCards+' domande padroneggiate ('+Math.round(mastered/totalCards*100)+'%)</div>'
+    +'</div>'
+    // Category breakdown
+    +'<div style="background:#fff;border-radius:12px;padding:16px;border:2px solid #e5e7eb">'
+    +'<div style="font-weight:700;margin-bottom:12px;font-size:13px">Dettaglio per categoria</div>'
+    +topCats.map(function(cat){
+      var s=catStats[cat];
+      var pct=Math.round(s.mastered/s.total*100);
+      return '<div style="margin-bottom:10px">'
+        +'<div style="display:flex;justify-content:space-between;margin-bottom:3px;font-size:12px">'
+        +'<span style="font-weight:600">'+cat+'</span>'
+        +'<span style="color:#6b7280">'+s.mastered+'/'+s.total+' ('+pct+'%)</span>'
+        +'</div>'
+        +'<div style="background:#f3f4f6;border-radius:6px;height:10px;overflow:hidden">'
+        +'<div style="background:#1B5E20;height:100%;border-radius:6px;width:'+pct+'%"></div>'
+        +'</div></div>';
+    }).join('')
+    +'</div>'
+    +'<div style="background:#E8F5E9;border-radius:10px;padding:12px;margin-top:12px;font-size:12px;color:#1B5E20;text-align:center">'
+    +'💡 Vai alla sezione <strong>Quiz</strong> per continuare a studiare con Spaced Repetition SM-2'
+    +'</div>'
+    +'</div>';
+};
+
+// ── NAV BUTTONS ──────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',function(){
+  var nav=document.getElementById('nav');
+  if(!nav) return;
+  [['snotes','📝 Note'],['sstats','📊 Statistiche']].forEach(function(pair){
+    if(!document.querySelector('[data-s="'+pair[0]+'"]')){
+      var btn=document.createElement('button');
+      btn.className='nav-btn';
+      btn.setAttribute('data-s',pair[0]);
+      btn.innerHTML=pair[1];
+      nav.appendChild(btn);
+    }
+  });
+});
+})();
+
+</script>
+<script>
+// Aggiunta diagrammi energetici mancanti
+(function(){
+'use strict';
+if(typeof ENERGY_PROFILES==='undefined' && typeof window.ENERGY_PROFILES==='undefined') return;
+var EP = typeof window.ENERGY_PROFILES!=='undefined' ? window.ENERGY_PROFILES : ENERGY_PROFILES;
+
+var NEW_PROFILES = [
+  // SEAr — due stadi con intermedio sigma (arenio)
+  {id:'sear',name:'SEAr — Sostituzione Elettrofila Aromatica',type:'two_step',
+   reactants:'ArH + E\u207a',intermediate:'Arenio \u03c3-complesso',products:'Ar-E + H\u207a',
+   Ea1:85,Ea2:25,dGint:35,dG:-10,
+   desc:'Due stadi: formazione dell\'arenio (\u03c3-complesso, passo lento) poi deprotonazione rapida per recuperare l\'aromaticit\u00e0. L\'arenio \u00e8 il minimo.',
+   notes:'La deprotonazione \u00e8 molto rapida (Ea2 piccola) perch\u00e9 riforma il sistema aromatico (energeticamente favorito).'},
+
+  // Addizione nucleofila al carbonile
+  {id:'carbonyl_add',name:'Addizione Nucleofila al Carbonile',type:'single_step',
+   reactants:'R\u2082C=O + Nu\u207b',products:'R\u2082C(Nu)(O\u207b)',
+   Ea:55,dG:-35,
+   desc:'Profilo concertato. Il nucleofilo attacca il C=O dall\'angolo di B\u00fcrgi-Dunitz (~107\u00b0). Ea dipende dalla reattivit\u00e0 del carbonile e dalla forza del nucleofilo.',
+   notes:'Reattivit\u00e0: aldeidi > chetoni > esteri > ammidi. NaBH\u2084 ha Ea bassa; LiAlH\u2084 ancora pi\u00f9 bassa (idruro pi\u00f9 reattivo).'},
+
+  // E1 — due stadi
+  {id:'e1',name:'E1 — Eliminazione in due stadi',type:'two_step',
+   reactants:'R-CHX-CH\u2082',intermediate:'Carbocatione R\u207a',products:'RCH=CH\u2082 + H\u207a + X\u207b',
+   Ea1:92,Ea2:15,dGint:38,dG:-18,
+   desc:'Come SN1: ionizzazione lenta (RDS) poi eliminazione rapida del \u03b2-H. Il carbocatione \u00e8 lo stesso intermedio dell\u2019SN1.',
+   notes:'E1 e SN1 competono sempre: base debole e calore favoriscono E1; nucleofilo forte e freddo favoriscono SN1.'},
+
+  // Fischer esterification — equilibrio
+  {id:'fischer_ester',name:'Esterificazione di Fischer (equilibrio)',type:'two_step',
+   reactants:'RCOOH + R\'OH (H\u207a)',intermediate:'Intermedio tetraedrico',products:'RCOOR\' + H\u2082O',
+   Ea1:72,Ea2:68,dGint:15,dG:-5,
+   desc:'Profilo quasi simmetrico: \u0394G\u2248 0 (equilibrio). Ea1 \u2248 Ea2 perch\u00e9 la reazione \u00e8 reversibile. Si sposta l\'equilibrio rimuovendo H\u2082O o usando eccesso di alcol.',
+   notes:'La reazione \u00e8 reversibile: stessa Ea per idrolisi dell\'estere. Per spostare: Dean-Stark trap, eccesso alcol, o molecole setaccio.'},
+
+  // Combustione — altamente esotermica
+  {id:'combustion',name:'Combustione — Reazione Altamente Esotermica',type:'single_step',
+   reactants:'CH\u2084 + 2O\u2082',products:'CO\u2082 + 2H\u2082O',
+   Ea:210,dG:-890,
+   desc:'\u0394G\u00b0 = -890 kJ/mol (metano). Altamente esotermica ma richiede alta Ea di attivazione (rottura C-H). Energeticamente favorita ma cineticamente inerte senza fiamma/calore.',
+   notes:'Paradosso termodinamica vs cinetica: il metano \u00e8 stabile all\'aria (Ea alta) nonostante \u0394G molto negativo. Serve la scintilla per superare la barriera.'},
+
+  // Acido-base — trasferimento protonico rapido
+  {id:'acid_base',name:'Trasferimento Protonico (acido forte)',type:'single_step',
+   reactants:'HCl + H\u2082O',products:'H\u2083O\u207a + Cl\u207b',
+   Ea:8,dG:-55,
+   desc:'Gli acidi forti hanno Ea \u2248 0: la reazione \u00e8 quasi istantanea (diffusion-limited). \u0394G molto negativo perch\u00e9 Ka >> 1.',
+   notes:'Acidi deboli hanno Ea > 0 e \u0394G > -30 kJ/mol (equilibrio parziale). Ka = exp(-\u0394G\u00b0/RT): pKa = \u0394G\u00b0/(2.303 RT).'},
+
+  // Grignard — addizione organometallica
+  {id:'grignard',name:'Reazione di Grignard',type:'single_step',
+   reactants:'RMgBr + R\'COR\'\'',products:'R-C(R\'R\'\')-OMgBr',
+   Ea:40,dG:-80,
+   desc:'Ea bassa: l\'organometallico \u00e8 molto reattivo (carbanione equivalente). Fortemente esotermica. Irreversibile in condizioni normali.',
+   notes:'L\'organocuprato (RCuLi) ha Ea intermedia e d\u00e0 addizione 1,4 (Michael) invece di 1,2 per effetto del rame.'},
+
+  // Addizione elettrofila alchene — Markovnikov
+  {id:'electrophilic_add',name:'Addizione HX a Alchene (Markovnikov)',type:'two_step',
+   reactants:'RCH=CH\u2082 + HX',intermediate:'Carbocatione (pi\u00f9 sostituito)',products:'RCH(X)-CH\u2083',
+   Ea1:65,Ea2:18,dGint:30,dG:-45,
+   desc:'Passo 1: protonazione dell\'alchene forma il carbocatione pi\u00f9 stabile (Markovnikov). Passo 2: X\u207b attacca il carbocatione rapidamente.',
+   notes:'Markovnikov: H\u207a va sul C con pi\u00f9 H, formando il carbocatione pi\u00f9 sostituito (pi\u00f9 stabile). Viola il principio con radicali (anti-Markovnikov).'},
+
+  // Enzima vs non catalizzato
+  {id:'enzyme_cat',name:'Catalisi Enzimatica vs Non Catalizzata',type:'comparison',
+   reactants:'S (substrato)',products:'P (prodotto)',
+   Ea_uncat:160,Ea_cat:45,dG:-30,
+   desc:'L\'enzima abbassa Ea di ~115 kJ/mol (tipico). Questo corrisponde a un aumento di velocit\u00e0 di 10\u00b9\u2079-10\u00b2\u2070 volte. Il \u0394G della reazione non cambia.',
+   notes:'Esempio: idrolisi dell\'ATP: non catalizzata t\u00bd \u2248 10 anni; con ATPasi t\u00bd \u2248 ms. Il sito attivo abbassa Ea stabilizzando il TS.'},
+
+  // Fotochemica — stato eccitato
+  {id:'photochem',name:'Reazione Fotochimica (eccitazione UV)',type:'single_step',
+   reactants:'A (S\u2080 ground state) + h\u03bd',products:'A* (S\u2081 excited state) \u2192 prodotti',
+   Ea:0,dG:300,
+   desc:'La luce UV fornisce l\u2019energia per superare la barriera. Il profilo \u00e8 inverso: S\u2080 \u2192 S\u2081 (assorbimento fotone) poi rilassamento al prodotto. Termicamente proibita \u2192 fotochimicamente permessa (Woodward-Hoffmann).',
+   notes:'Esempi: [2+2] cicloaddizione (permessa fotochimicamente), isomerizzazione cis-trans retinale (visione), formazione di vitamina D3 dalla pelle.'},
+];
+
+NEW_PROFILES.forEach(function(p){
+  if(!EP.find(function(e){return e.id===p.id;})){
+    EP.push(p);
+  }
+});
+console.log('Diagrammi energetici totali: ' + EP.length);
+})();
+
+</script>
+<script>
+// Info cliniche per i farmaci principali
+(function(){
+'use strict';
+if(typeof window.getDrugClinicalInfo!=='function') return;
+if(typeof window.DRUG_CLINICAL_DB==='undefined') window.DRUG_CLINICAL_DB={};
+
+var EXTRA_DRUGS = {
+"Ciprofloxacina":{
+  uso_clinico:"Fluorochinolone ad ampio spettro. Battericida per inibizione della DNA girasi e topoisomerasi IV.",
+  patologie:["Infezioni vie urinarie complicate e pielonefrite","Polmonite atipica e nosocomiale","Infezioni addominali (con metronidazolo)","Antrace (Bacillus anthracis)","Prostatite batterica cronica"],
+  trattamento:"500mg 2×/die PO oppure 400mg EV ogni 12h. UTI non complicata: 250mg 2×/die × 3 giorni. Pielonefrite: 500mg 2×/die × 7-14 giorni.",
+  controindicazioni:["Età < 18 anni (rischio artropatie)","Gravidanza e allattamento","QT lungo congenito o acquisito","Uso con tizanidina (↑ 10× esposizione)","Miastenia gravis (peggioramento)"],
+  effetti_indesiderati:["Nausea, diarrea (5-10%)","Tendinite e rottura del tendine d'Achille (specialmente con corticosteroidi)","Fotosensibilità","Allungamento QT, aritmie","Disturbi neuropsichiatrici (rari): confusione, allucinazioni","Colite da C. difficile"],
+  interazioni:["Antiacidi, latte, ferro, zinco: assorbimento ridotto del 70% — assumere 2h lontano","Warfarin: aumenta fortemente l'INR","FANS: aumenta rischio convulsioni","Teofillina: concentrazioni teofillina raddoppiate"],
+  eccipienti_comuni:["Cellulosa microcristallina","Amido di mais","Magnesio stearato","Film coat: HPMC, TiO₂"],
+  avvertenza_medico:"⚕️ Interrompere subito e consultare il medico se compaiono dolori ai tendini, gonfiore o difficoltà motorie. Evitare sole e lampade UV durante il trattamento.",
+  monitoraggio:"Funzionalità renale. ECG se rischio QT. Glicemia (può causare ipo/iperglicemia).",classe:"Fluorochinolone",fascia:"Fascia A"
+},
+"Azitromicina":{
+  uso_clinico:"Macrolide a lunga emivita (t½=68h). 1 dose/die per 3-5 giorni. Attivo su batteri intracellulari (Chlamydia, Mycoplasma, Legionella).",
+  patologie:["Polmonite acquisita in comunità (lieve-moderata)","Faringotonsillite (alternativa ai β-lattamici in allergici)","Infezioni da Chlamydia trachomatis","Otite media acuta nei bambini","Profilassi endocardite batterica"],
+  trattamento:"Adulti: 500mg il 1° giorno, poi 250mg × 4 giorni. Oppure 500mg × 3 giorni. Bambini: 10mg/kg/die × 3-5 giorni.",
+  controindicazioni:["Prolungamento QT noto","Aritmie ventricolari nella storia","Uso con ergotamina (vasospasmo)","Epatopatia grave"],
+  effetti_indesiderati:["Disturbi GI: nausea, diarrea, dolore addominale (< 10%)","Allungamento QT — aritmie ventricolari (raro ma grave)","Epatotossicità (rara)","Ototossicità a dosi alte","Reazioni allergiche (< 1%)"],
+  interazioni:["Antiacidi con Al/Mg: assorbimento ridotto — prendere 1h prima o 2h dopo","Warfarin: aumenta INR","Digossina: aumenta digossinemia","Statine: aumenta rischio miopatia"],
+  eccipienti_comuni:["Lattosio monoidrato","Amido di mais","Magnesio stearato","Sospensione: saccarosio, gomma xantana, aromi"],
+  avvertenza_medico:"⚕️ Comunicare al medico se si hanno problemi cardiaci o si prendono altri farmaci che allungano il QT. Non assumere antiacidi entro 2h.",
+  monitoraggio:"ECG se fattori di rischio cardiaco. Funzionalità epatica se uso prolungato.",classe:"Macrolide",fascia:"Fascia A"
+},
+"Naproxene":{
+  uso_clinico:"FANS profene con lunga emivita (t½=12-17h) — 2 dosi/die. Ottimo per dolore infiammatorio cronico e dismenorrea.",
+  patologie:["Artrite reumatoide e osteoartrite","Dismenorrea primaria","Gotta acuta (alternativa alla colchicina)","Dolore muscolo-scheletrico","Cefalea tensiva"],
+  trattamento:"250-500mg 2×/die ai pasti. Gotta: 750mg poi 250mg ogni 8h. Max 1250mg/die. Dismenorrea: 500mg poi 250mg ogni 6-8h.",
+  controindicazioni:["Ulcera peptica attiva","Insufficienza renale grave","3° trimestre gravidanza","Scompenso cardiaco","Chirurgia cardiaca recente"],
+  effetti_indesiderati:["Disturbi GI: dispepsia, nausea, ulcera","Ritenzione idrica, ipertensione","Rischio cardiovascolare con uso cronico","Tossicità renale","Rash cutaneo"],
+  interazioni:["Litio: aumenta litiemia (monitorare)","Aspirina: riduce effetto antiaggregante dell'aspirina","ACE-inibitori: riduzione efficacia antipertensiva","SSRIs: aumento rischio sanguinamento GI"],
+  eccipienti_comuni:["Cellulosa microcristallina","Povidone","Talco","Magnesio stearato"],
+  avvertenza_medico:"⚕️ Usare la dose minima efficace per il tempo più breve. Non associare ad altri FANS. Protezione gastrica con PPI se uso > 2 settimane.",
+  monitoraggio:"Pressione arteriosa. Funzionalità renale. Emoglobina con uso cronico.",classe:"FANS (profene)",fascia:"SOP e Fascia A"
+},
+"Diclofenac":{
+  uso_clinico:"FANS con buona selettività COX-2 relativa. Disponibile in formulazioni topiche (gel) per uso locale con minori effetti sistemici.",
+  patologie:["Artrite reumatoide e osteoartrite","Dolore acuto post-chirurgico","Dismenorrea","Emicrania (formulazione effervescente)","Uso topico: tendiniti, contusioni, dolore articolare localizzato"],
+  trattamento:"PO: 50mg 3×/die o 75mg 2×/die ai pasti. Gel 1%: applicare 3-4g per area 3-4×/die. Collirio (Voltaren oftalmica): infiammazione oculare post-chirurgica.",
+  controindicazioni:["Ulcera peptica attiva","Epatopatia grave (AST/ALT > 3×ULN)","Insufficienza renale o cardiaca grave","3° trimestre gravidanza"],
+  effetti_indesiderati:["GI: dispepsia, ulcera (formulazione orale)","Epatotossicità: elevazione transaminasi (più frequente vs altri FANS)","Edemi, ipertensione","Reazioni cutanee (topico: dermatite da contatto rara)"],
+  interazioni:["Metotrexato: aumenta tossicità","Ciclosporina: aumenta nefrotossicità","Litio: aumenta litiemia","Anticoagulanti: aumenta rischio emorragico"],
+  eccipienti_comuni:["Gel: carbomer, isopropanolo, propilene glicole","Compresse: cellulosa, amido, magnesio stearato"],
+  avvertenza_medico:"⚕️ Monitorare le transaminasi se uso > 4 settimane. Il gel topico ha molto meno effetti sistemici — preferirlo quando possibile.",
+  monitoraggio:"Transaminasi (ALT, AST) con uso prolungato. PA, funzionalità renale.",classe:"FANS",fascia:"SOP (gel), Fascia A (compresse)"
+},
+"Semaglutide":{
+  uso_clinico:"Agonista del recettore GLP-1 a lunga durata (1 iniezione/settimana). Abbassa la glicemia E il peso corporeo. Riduce gli eventi cardiovascolari maggiori.",
+  patologie:["Diabete mellito tipo 2 (seconda linea dopo metformina)","Obesità/sovrappeso con comorbilità (Ozempic/Wegovy)","Riduzione del rischio CV in diabetici con malattia CV stabilita"],
+  trattamento:"Diabetes T2: iniziare 0.25mg/sett SC × 4 settimane → 0.5mg/sett → max 1mg/sett. Obesità (Wegovy): fino a 2.4mg/sett. Orale (Rybelsus): 3mg/die → 7mg → 14mg.",
+  controindicazioni:["Storia personale/familiare di carcinoma midollare della tiroide","MEN tipo 2","Gastroparesi grave","Pancreatite acuta in anamnesi"],
+  effetti_indesiderati:["Nausea, vomito, diarrea: molto comuni all'inizio (migliorano con il tempo)","Diminuzione dell'appetito e del peso (effetto desiderato in obesità)","Pancreatite acuta (rara ma grave — interrompere)","Colelitiasi (aumentata incidenza)","Rallentamento svuotamento gastrico (attenzione ai farmaci orali)"],
+  interazioni:["Farmaci orali con finestra terapeutica stretta: rallentamento assorbimento per svuotamento gastrico ritardato","Insulina/sulfaniluree: aumentato rischio ipoglicemia"],
+  eccipienti_comuni:["Penna iniettabile: fenolo, fosfato di sodio, acqua per preparazioni iniettabili","Orale: SNAC (sodio N-[8-(2-idrossibenzoil)amminooctanoato) come carrier"],
+  avvertenza_medico:"⚕️ Riferire subito al medico dolori addominali persistenti (pancreatite). Non adatto a donne in gravidanza. Il peso si riduce ma la terapia deve essere continuata.",
+  monitoraggio:"HbA1c ogni 3 mesi. Lipasi/amilasi se dolore addominale. Funzionalità renale.",classe:"Agonista GLP-1",fascia:"Fascia A (T2DM), Classe C (obesità)"
+},
+"Apixaban":{
+  uso_clinico:"Anticoagulante orale diretto (DOAC) — inibitore del fattore Xa. Non richiede monitoraggio INR. Alternativa al warfarin.",
+  patologie:["Fibrillazione atriale non valvolare (prevenzione ictus)","TVP e embolia polmonare (trattamento e profilassi recidiva)","Profilassi TEV dopo chirurgia ortopedica (anca/ginocchio)"],
+  trattamento:"FA: 5mg 2×/die (ridurre a 2.5mg 2×/die se ≥2 criteri: età≥80, peso≤60kg, creatinina≥1.5mg/dL). TEV: 10mg 2×/die × 7 giorni poi 5mg 2×/die.",
+  controindicazioni:["Sanguinamento attivo clinicamente significativo","Lesioni con rischio emorragico (ulcera peptica attiva)","Epatopatia con coagulopatia","Gravidanza","Uso con altri anticoagulanti"],
+  effetti_indesiderati:["Sanguinamento: principale complicanza (minore frequenza vs warfarin per emorragie intracraniche)","Anemia","Nausea, dispepsia (rara)","Aumento transaminasi (raro)"],
+  interazioni:["Inibitori forti CYP3A4+P-gp (ketoconazolo, ritonavir): NON usare — aumenta apixaban 2×","Induttori forti (rifampicina, carbamazepina): riduzione 50% — evitare","FANS/aspirina: aumenta rischio emorragico"],
+  eccipienti_comuni:["Lattosio","Cellulosa microcristallina","Croscarmellosio sodico","Magnesio stearato"],
+  avvertenza_medico:"⚕️ NON INTERROMPERE MAI senza indicazione medica. Comunicare sempre al medico, dentista e pronto soccorso che si sta assumendo apixaban. In caso di sanguinamento abbondante, chiamare il 118.",
+  monitoraggio:"Funzionalità renale (eGFR) annualmente. Non richiede monitoraggio INR (vantaggio vs warfarin). Aderenza terapeutica (no finestre).",classe:"Anticoagulante orale diretto (DOAC) — inibitore Xa",fascia:"Fascia A"
+},
+"Amiodarone":{
+  uso_clinico:"Antiaritmico classe III (canali K⁺). Il più efficace per fibrillazione e flutter atriale ma con numerosi effetti collaterali e interazioni. Usato quando altri falliscono.",
+  patologie:["Fibrillazione atriale (mantenimento ritmo sinusale)","Tachicardia ventricolare e fibrillazione ventricolare (anche in rianimazione EV)","Tachiaritmie sopraventricolari refrattarie"],
+  trattamento:"Orale: carico 200mg 3×/die × 1 settimana → 200mg 2×/die × 1 settimana → mantenimento 200mg/die. EV (aritmie acute): 300mg in bolo poi infusione continua.",
+  controindicazioni:["Disfunzione tiroidea (ipo o ipertiroidismo)","Fibrosi polmonare preesistente","Gravidanza e allattamento (deposito fetale)","Bradicardia sinusale grave","Blocco AV 2°-3° grado senza pacemaker"],
+  effetti_indesiderati:["Tossicità polmonare: polmonite da amiodarone (1-17%) — può essere fatale","Disfunzione tiroidea: ipo (6%) o ipertiroidismo (2%)","Depositi corneali (quasi tutti i pazienti — reversibili)","Fotosensibilità cutanea e colorazione grigio-bluastra","Neuropatia periferica (uso cronico)","Tossicità epatica","Bradicardia e blocchi AV"],
+  interazioni:["Warfarin: RADDOPPIA l'INR — ridurre warfarin del 30-50% all'inizio","Digossina: raddoppia la digossinemia — ridurre dose","Statine: aumenta rischio miopatia — max simvastatina 20mg","QT-prolonging drugs: rischio torsades de pointes"],
+  eccipienti_comuni:["Lattosio","Magnesio stearato","Silice colloidale anidra","Amido di mais"],
+  avvertenza_medico:"⚕️ FARMACO AD ALTO RISCHIO. Richiede monitoraggio frequente. Riferire immediatamente: tosse secca persistente, dispnea (polmonite), sensazione di freddo/caldo anomalo (tiroide). Evitare sole diretto.",
+  monitoraggio:"TSH ogni 6 mesi. Rx torace/spirometria annuale. Transaminasi ogni 6 mesi. ECG. Visita oculistica annuale. Elettroliti.",classe:"Antiaritmico classe III",fascia:"Fascia A"
+},
+"Levodopa (L-DOPA)":{
+  uso_clinico:"Precursore della dopamina. Farmaco cardine del morbo di Parkinson. Sempre associato a carbidopa/benserazide (inibitori della dopa-decarbossilasi periferica) per ridurre effetti periferici.",
+  patologie:["Malattia di Parkinson idiopatica (prima scelta)","Parkinsonismi secondari (parzialmente efficace)","Sindrome delle gambe senza riposo (off-label, dosi basse)"],
+  trattamento:"Sempre in associazione: Levodopa/Carbidopa 100/25mg o 250/25mg. Iniziare con dosi basse (100mg 3×/die) e titrare lentamente. Dose ottimale: 300-800mg/die in 3-4 dosi.",
+  controindicazioni:["Melanoma maligno (levodopa stimola la crescita)","Glaucoma ad angolo chiuso non trattato","IMAO non selettivi (crisi ipertensive) — sospendere 14gg prima","Psicosi grave"],
+  effetti_indesiderati:["Nausea, vomito (inizio terapia — migliorano)","Ipotensione ortostatica","Discinesie (movimenti involontari) con uso cronico","Fluttuazioni motorie: wearing-off, on-off phenomenon","Allucinazioni visive, psicosi (dosi alte, anziani)","Impulso gioco d'azzardo, ipersessualità (dopamine dysregulation)"],
+  interazioni:["Antipsicotici tipici (aloperidolo): antagonismo — riduzione efficacia","Vitamina B6 (piridossina) ad alte dosi: aumenta metabolismo periferico (non con carbidopa)","MAO-B inibitori (selegilina, rasagilina): associazione sicura e sinergica","Ferro: riduce assorbimento — separare di 2h"],
+  eccipienti_comuni:["Cellulosa microcristallina","Amido pregelatinizzato","Magnesio stearato"],
+  avvertenza_medico:"⚕️ Non interrompere mai bruscamente — rischio sindrome maligna da neurolettici. Riferire allucinazioni o comportamenti compulsivi (gioco, shopping). Alzarsi lentamente per ipotensione ortostatica.",
+  monitoraggio:"Valutazione neurologica periodica (UPDRS). PA ortostatica. Monitorare umore e comportamenti impulsivi.",classe:"Precursore dopaminergico",fascia:"Fascia A"
+},
+"Aloperidolo":{
+  uso_clinico:"Antipsicotico tipico (prima generazione) — antagonista D2. Potente, disponibile EV per emergenze psichiatriche. Efficace per sintomi positivi della schizofrenia.",
+  patologie:["Schizofrenia (sintomi positivi: allucinazioni, deliri)","Disturbo bipolare con episodi maniacali acuti","Agitazione psicomotoria acuta (EV/IM)","Tic e sindrome di Tourette","Nausea refrattaria (off-label)"],
+  trattamento:"Schizofrenia cronica PO: 2-20mg/die in 2-3 dosi. IM acuto: 5mg ogni 4-8h. Decanoato depot (Haldol LA): 50-200mg IM ogni 4 settimane.",
+  controindicazioni:["Morbo di Parkinson (peggioramento drammatico)","QT lungo congenito","Depressione del SNC grave","Feocromocitoma"],
+  effetti_indesiderati:["Sintomi extrapiramidali (EPS): distonie, acatisia, parkinsonismo (dose-dipendente — molto comuni)","Discinesia tardiva (uso cronico — irreversibile)","Allungamento QT, torsades de pointes","Iperprolattinemia: ginecomastia, galattorrea, disfunzione sessuale","Sindrome maligna da neurolettici (rara ma fatale)","Sedazione, ipotensione"],
+  interazioni:["Levodopa: antagonismo — non associare nel Parkinson","Litio: neurotossicità","QT-prolonging drugs: rischio aritmie grave","Alcol e sedativi: potenziamento della sedazione"],
+  eccipienti_comuni:["Lattosio","Amido di mais","Magnesio stearato","Soluzione iniettabile: acido lattico, acqua per prep. iniet."],
+  avvertenza_medico:"⚕️ Riferire immediatamente: rigidità muscolare intensa, febbre alta, alterazione coscienza (sindrome maligna). Movimenti involontari persistenti dopo mesi/anni possono indicare discinesia tardiva.",
+  monitoraggio:"ECG (QTc). Movimenti involontari (scala AIMS). Prolattina se sintomi. Glicemia (rischio diabete con antipsicotici).",classe:"Antipsicotico tipico (1° generazione)",fascia:"Fascia A"
+},
+"Aciclovir":{
+  uso_clinico:"Analogo nucleosidico antivirale. Attivo contro Herpes simplex (HSV-1, HSV-2) e Varicella-zoster (VZV). Richiede attivazione da parte della timidina chinasi virale (selettività).",
+  patologie:["Herpes labiale e genitale (HSV-1/2)","Varicella e Herpes zoster (fuoco di Sant'Antonio)","Encefalite erpetica (EV — urgenza)","Profilassi in immunodepressi (trapianti, HIV)"],
+  trattamento:"HSV genitale primo episodio: 400mg 3×/die × 7-10 giorni. Herpes zoster: 800mg 5×/die × 7-10 giorni. Encefalite (EV): 10-15mg/kg ogni 8h × 14-21 giorni.",
+  controindicazioni:["Ipersensibilità nota","Caution: IRC (ridurre dose in base a eGFR)"],
+  effetti_indesiderati:["PO: nausea, mal di testa, diarrea (lievi)","EV: nefrotossicità (cristalluria) — idratare abbondantemente","Neurotossicità (agitazione, tremore) con EV ad alte dosi in IRC","Flebite nel sito di infusione"],
+  interazioni:["Probenecid: riduce l'eliminazione renale (aumenta esposizione)","Farmaci nefrotossici (aminoglicosidi, ciclosporina): aumenta rischio renale"],
+  eccipienti_comuni:["Compresse: cellulosa microcristallina, amido","Crema: propilene glicole, cetostearil alcol","EV: NaCl, acqua per preparazioni iniettabili"],
+  avvertenza_medico:"⚕️ Iniziare il trattamento il prima possibile dall'inizio dei sintomi (entro 72h per herpes zoster). Bere abbondantemente durante la terapia EV per prevenire la cristalluria renale.",
+  monitoraggio:"Funzionalità renale (creatinina) specialmente con EV. Diuresi durante infusione.",classe:"Antivirale (analogo nucleosidico)",fascia:"Fascia A"
+},
+"Cisplatino":{
+  uso_clinico:"Agente alchilante del DNA contenente platino. Forma crosslink intrastrand con la guanina (N7) → blocca la replicazione del DNA → apoptosi cellulare. Tra i chemioterapici più usati.",
+  patologie:["Carcinoma del testicolo (altamente efficace — guarigione 95%)","Carcinoma ovarico","Carcinoma polmonare non a piccole cellule","Carcinoma cervicale e della vescica","Carcinoma della testa e collo"],
+  trattamento:"Somministrazione EV in ospedale. Dose: 50-100mg/m² ogni 3-4 settimane (cicli). Richiede idratazione intensa pre/post (2-3L SF) per prevenire nefrotossicità.",
+  controindicazioni:["Insufficienza renale (ClCr < 60 mL/min)","Mielosoppressione grave preesistente","Ipoacusia significativa","Neuropatia periferica grave preesistente","Gravidanza e allattamento"],
+  effetti_indesiderati:["Nefrotossicità: principale effetto dose-limitante (tubulotossicità)","Neurotossicità periferica: neuropatia sensitiva cumulativa (parestesie permanenti)","Ototossicità: perdita udito (frequenze alte)","Nausea e vomito intensi (richiede antiemetici: ondansetrone + desametasone)","Mielosoppressione (nadir 14-21 gg)","Ipomagnesemia, ipokaliemia (tubulotossicità)"],
+  interazioni:["Aminoglicosidi: aumenta nefrotossicità e ototossicità","Loop diuretici: aumenta ototossicità","Altri agenti nefrotossici: evitare combinazione"],
+  eccipienti_comuni:["Soluzione iniettabile: NaCl, acqua per prep. iniett.","Conservare in vetro (non plastica — reagisce con PVC)"],
+  avvertenza_medico:"⚕️ Farmaco utilizzato solo in ambito ospedaliero specializzato. Riferire immediatamente: riduzione della diuresi, formicolio alle mani/piedi, difficoltà uditive. L'idratazione abbondante è obbligatoria prima e dopo la somministrazione.",
+  monitoraggio:"Creatinina e clearance PRIMA di ogni ciclo. Audiometria periodica. Emocromo. Magnesiemia e kaliemia.",classe:"Agente alchilante al platino",fascia:"Ospedaliero"
+}
+};
+
+// Merge into existing DRUG_CLINICAL_DB
+Object.keys(EXTRA_DRUGS).forEach(function(name){
+  if(!window.DRUG_CLINICAL_DB[name]){
+    window.DRUG_CLINICAL_DB[name] = EXTRA_DRUGS[name];
+  }
+});
+console.log('Farmaci con info clinica totali: ' + Object.keys(window.DRUG_CLINICAL_DB).length);
+})();
 
 </script>
 </body>
