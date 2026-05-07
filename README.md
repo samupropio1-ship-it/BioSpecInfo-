@@ -57,13 +57,6 @@ Nessuna installazione. Funziona nel browser. Funziona offline.
 
 ---
 
-## 📄 Tesi di Laurea
-
-Sviluppato come progetto di tesi triennale in Chimica presso l'Università degli Studi di Bari Aldo Moro (2024–2025).
-
-Fondamento teorico: Longo, S. *"Molecular Blueprinting by Word Processing"*, Symmetry 2023, 15, 357. DOI: [10.3390/sym15020357](https://doi.org/10.3390/sym15020357)
-
----
 
 ## ⚖️ Licenza
 
