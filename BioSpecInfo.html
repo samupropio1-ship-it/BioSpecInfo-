@@ -104,6 +104,11 @@ a:hover { text-decoration: underline; }
   position: sticky; top: 58px; z-index: 90;
 }
 #nav::-webkit-scrollbar { display: none; }
+.nav-group-tab:hover { background: var(--g100) !important; color: var(--text1) !important; }
+.nav-group-panel { scrollbar-width: none; }
+.nav-group-panel::-webkit-scrollbar { display: none; }
+#navSearch:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(27,94,32,0.15); }
+#navSearchResults .nav-btn { font-size: 11px; }
 .nav-btn {
   border: none; background: none; color: var(--text3);
   font-family: var(--font); font-size: 11px; font-weight: 600;
@@ -663,41 +668,113 @@ input::placeholder, textarea::placeholder { color: #888888; }
       </svg>
       <div class="logo-text">
         <div class="logo-name">BioSpecInfo</div>
-        <div class="logo-sub">MOLECULAR · SPECTRAL · DASHBOARD · V8.0</div>
+        <div class="logo-sub">MOLECULAR · SPECTRAL · DASHBOARD · V10.0</div>
       </div>
     </div>
     <button class="btn" id="shareBtn">🔗 Condividi</button>
+    <button class="btn" id="downloadBtn" onclick="downloadApp()" style="background:linear-gradient(135deg,#1565C0,#1976D2)">⬇️ Scarica HTML</button>
     <button class="btn" id="installBtn" onclick="showInstallGuide()" style="background:linear-gradient(135deg,#1B5E20,#2E7D32)">📲 Installa App</button>
   </div>
 </div>
 
 <!-- ═══════════════ NAV ═══════════════ -->
-<div id="nav">
-  <button class="nav-btn on" data-s="smol">🔬 Molecola</button>
-  <button class="nav-btn" data-s="spt">⬡ Tavola Periodica</button>
-  <button class="nav-btn" data-s="ssyn">🧪 Sintesi</button>
-  <button class="nav-btn" data-s="saa">🧬 Amminoacidi</button>
-  <button class="nav-btn" data-s="sspec">📊 Spettri Ref.</button>
-  <button class="nav-btn" data-s="sfarm">💊 Farmaci</button>
-  <button class="nav-btn" data-s="scalc">🔢 Calcolatore</button>
-  <button class="nav-btn" data-s="sbio">🧫 Biomolecole</button>
-  <button class="nav-btn" data-s="sbiosyn">🔬 Sintesi Bio</button>
-  <button class="nav-btn" data-s="sstruct">🧬 Strutture 3D</button>
-  <button class="nav-btn" data-s="sform">📐 Formule</button>
-  <button class="nav-btn" data-s="sai">🤖 AI Chat</button>
+<div id="navWrapper" style="position:sticky;top:58px;z-index:90;background:var(--white);border-bottom:2px solid var(--g200);box-shadow:0 2px 6px rgba(0,0,0,.08)">
+
+  <!-- Search bar -->
+  <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--g200)">
+    <input id="navSearch" type="text" placeholder="🔍 Cerca sezione..." 
+      oninput="filterNavSearch(this.value)"
+      style="flex:1;background:#f0f4f8;border:1px solid var(--g200);border-radius:20px;padding:7px 14px;font-size:13px;color:var(--text1);outline:none;font-family:var(--font)">
+    <button onclick="clearNavSearch()" id="navSearchClear" 
+      style="display:none;background:none;border:none;cursor:pointer;color:var(--text3);font-size:18px;padding:0 4px">✕</button>
+  </div>
+
+  <!-- Search results (hidden by default) -->
+  <div id="navSearchResults" style="display:none;padding:6px 10px;flex-wrap:wrap;gap:4px;max-height:120px;overflow-y:auto;background:#f8fafc"></div>
+
+  <!-- Group tabs -->
+  <div id="navGroupTabs" style="display:flex;overflow-x:auto;scrollbar-width:none;gap:2px;padding:4px 8px">
+    <button class="nav-group-tab" data-group="0" onclick="switchNavGroup(0)" 
+      style="border:1px solid var(--g200);background:none;border-radius:16px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;color:var(--text3);transition:all 0.15s;font-family:var(--font)" style="background:var(--primary);color:#fff;border-color:var(--primary)">🔬 Chimica</button>
+    <button class="nav-group-tab" data-group="1" onclick="switchNavGroup(1)" 
+      style="border:1px solid var(--g200);background:none;border-radius:16px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;color:var(--text3);transition:all 0.15s;font-family:var(--font)" >📊 Spettroscopia</button>
+    <button class="nav-group-tab" data-group="2" onclick="switchNavGroup(2)" 
+      style="border:1px solid var(--g200);background:none;border-radius:16px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;color:var(--text3);transition:all 0.15s;font-family:var(--font)" >🧬 Biochimica</button>
+    <button class="nav-group-tab" data-group="3" onclick="switchNavGroup(3)" 
+      style="border:1px solid var(--g200);background:none;border-radius:16px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;color:var(--text3);transition:all 0.15s;font-family:var(--font)" >💊 Farmacologia</button>
+    <button class="nav-group-tab" data-group="4" onclick="switchNavGroup(4)" 
+      style="border:1px solid var(--g200);background:none;border-radius:16px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;color:var(--text3);transition:all 0.15s;font-family:var(--font)" >⚗️ Chimica Fisica</button>
+    <button class="nav-group-tab" data-group="5" onclick="switchNavGroup(5)" 
+      style="border:1px solid var(--g200);background:none;border-radius:16px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;color:var(--text3);transition:all 0.15s;font-family:var(--font)" >📚 Studio</button>
+    <button class="nav-group-tab" data-group="6" onclick="switchNavGroup(6)" 
+      style="border:1px solid var(--g200);background:none;border-radius:16px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;color:var(--text3);transition:all 0.15s;font-family:var(--font)" >🛠️ Utility</button>
+  </div>
+
+  <!-- Group button panels -->
+  <div id="navGroup0" class="nav-group-panel" style="display:flex;overflow-x:auto;scrollbar-width:none;padding:2px 6px 6px">
+    <button class="nav-btn on" data-s="smol">🔍 Molecola</button>
+    <button class="nav-btn" data-s="spt">⬡ Tavola Periodica</button>
+    <button class="nav-btn" data-s="ssyn">🧪 Sintesi Org.</button>
+    <button class="nav-btn" data-s="sretro">🔄 Retrosintesi</button>
+    <button class="nav-btn" data-s="sanimmech">🎬 Meccanismi</button>
+    <button class="nav-btn" data-s="smoldraw">✏️ Editor Mol.</button>
+    <button class="nav-btn" data-s="sform">📐 Formule</button>
+    <button class="nav-btn" data-s="sconst">⚛️ Costanti</button>
+    <button class="nav-btn" data-s="sinorg">⚗️ Inorganica</button>
+    <button class="nav-btn" data-s="srxnbal">⚖️ Bilancia Rz.</button>
+  </div>
+  <div id="navGroup1" class="nav-group-panel" style="display:none;overflow-x:auto;scrollbar-width:none;padding:2px 6px 6px">
+    <button class="nav-btn" data-s="sspec">📊 Spettri Ref.</button>
     <button class="nav-btn" data-s="sirvis">📈 IR Visivi</button>
-    <button class="nav-btn" data-s="sms">⚗️ Spettro Massa</button>
+    <button class="nav-btn" data-s="sms">⚗️ Spettro MS</button>
+    <button class="nav-btn" data-s="snoe">🔗 NMR 2D/NOE</button>
+    <button class="nav-btn" data-s="suvvis">🌈 UV-Vis</button>
+    <button class="nav-btn" data-s="snmrpred">📡 NMR Pred.</button>
+  </div>
+  <div id="navGroup2" class="nav-group-panel" style="display:none;overflow-x:auto;scrollbar-width:none;padding:2px 6px 6px">
+    <button class="nav-btn" data-s="saa">🧬 Amminoacidi</button>
+    <button class="nav-btn" data-s="sbio">🧫 Biomolecole</button>
+    <button class="nav-btn" data-s="sbiosyn">🔬 Biosintesi</button>
+    <button class="nav-btn" data-s="sstruct">🧬 Strutture 3D</button>
     <button class="nav-btn" data-s="sglyc">⚡ Metabolismo</button>
-    <button class="nav-btn" data-s="smo">🔵 Orbitali MO</button>
-    <button class="nav-btn" data-s="spka">🧪 pKa/Tamponi</button>
+  </div>
+  <div id="navGroup3" class="nav-group-panel" style="display:none;overflow-x:auto;scrollbar-width:none;padding:2px 6px 6px">
+    <button class="nav-btn" data-s="sfarm">💊 Farmaci</button>
     <button class="nav-btn" data-s="sdint">⚠️ Interazioni</button>
     <button class="nav-btn" data-s="spkcalc">📐 Farmacocin.</button>
     <button class="nav-btn" data-s="sclinical">🏥 Casi Clinici</button>
-    <button class="nav-btn" data-s="snoe">🔗 NMR 2D/NOE</button>
-    <button class="nav-btn" data-s="suvvis">🌈 UV-Vis</button>
-    <button class="nav-btn" data-s="svsepr">🔷 VSEPR</button>
+    <button class="nav-btn" data-s="smorb">🏥 Patologie</button>
+  </div>
+  <div id="navGroup4" class="nav-group-panel" style="display:none;overflow-x:auto;scrollbar-width:none;padding:2px 6px 6px">
+    <button class="nav-btn" data-s="smo">🔵 Orbitali MO</button>
+    <button class="nav-btn" data-s="spka">🧪 pKa/Tamponi</button>
     <button class="nav-btn" data-s="smm">⚗️ Cinetica Enz.</button>
     <button class="nav-btn" data-s="snernst">⚡ Elettrochimica</button>
+    <button class="nav-btn" data-s="svsepr">🔷 VSEPR</button>
+    <button class="nav-btn" data-s="stitr">🧪 Titolazione</button>
+    <button class="nav-btn" data-s="skin">⏱️ Cinetica</button>
+    <button class="nav-btn" data-s="sphase">📊 Fasi</button>
+    <button class="nav-btn" data-s="senergia">⚡ Diagrammi E.</button>
+    <button class="nav-btn" data-s="scalcav">🧮 Calc. Avanz.</button>
+    <button class="nav-btn" data-s="scalc">🔢 Calcolatore</button>
+  </div>
+  <div id="navGroup5" class="nav-group-panel" style="display:none;overflow-x:auto;scrollbar-width:none;padding:2px 6px 6px">
+    <button class="nav-btn" data-s="squiz">❓ Quiz</button>
+    <button class="nav-btn" data-s="sexam">🎓 Esame UniBA</button>
+    <button class="nav-btn" data-s="sstudypath">📚 Percorsi</button>
+    <button class="nav-btn" data-s="stheory">📖 Teoria</button>
+    <button class="nav-btn" data-s="scustomflash">🃏 Flashcard</button>
+  </div>
+  <div id="navGroup6" class="nav-group-panel" style="display:none;overflow-x:auto;scrollbar-width:none;padding:2px 6px 6px">
+    <button class="nav-btn" data-s="sai">🤖 AI Chat</button>
+    <button class="nav-btn" data-s="slab">🔬 Laboratorio</button>
+    <button class="nav-btn" data-s="sghs">⚠️ GHS</button>
+    <button class="nav-btn" data-s="smap">🗺️ Mappa Concett.</button>
+    <button class="nav-btn" data-s="srisorse">🌐 Risorse Web</button>
+    <button class="nav-btn" data-s="snotes">📝 Note</button>
+    <button class="nav-btn" data-s="sstats">📊 Statistiche</button>
+    <button class="nav-btn" data-s="spomo">🍅 Pomodoro</button>
+  </div>
 </div>
 
 <!-- ═══════════════ MAIN ═══════════════ -->
@@ -17650,7 +17727,26 @@ function setupNavBtn(btn){
     var secEl = document.getElementById(sec);
     if(secEl){ secEl.classList.add('on'); secEl.style.display='block'; window.scrollTo({top:0,behavior:'smooth'}); }
     // Call init function if available
-    var initMap = {"squiz": "initQuiz", "sstudypath": "initStudyPath", "sconstants": "initConstants", "sghs": "initGHS", "spomo": "initPomodoro", "sconst": "initConstants", "srxnbal": "initRxnBalancer", "ssmiles": "initSmilesEditor", "slab": "initLab", "sanimmech": "initAnimMech", "sexam": "initExamMode", "snmrpred": "initNMRPredictor", "scalcav": "initCalcAvanzato", "stitr": "initTitration", "skin": "initKinetics", "smorb": "initMOViewer", "sinorg": "initInorganic", "sretro": "initRetro", "scustomflash": "initCustomFlash", "sphase": "initPhase", "smap": "initConceptMap", "senergia": "initEnergyDiagrams", "sstudypath": "initStudyPath"};
+    var initMap = {"squiz": "initQuiz", "sstudypath": "initStudyPath", "sconstants": "initConstants", "sghs": "initGHS", "spomo": "initPomodoro", "sconst": "initConstants", "srxnbal": "initRxnBalancer", "ssmiles": "initSmilesEditor", "slab": "initLab", "sanimmech": "initAnimMech", "sexam": "initExamMode", "snmrpred": "initNMRPredictor", "scalcav": "initCalcAvanzato", "stitr": "initTitration", "skin": "initKinetics", "smorb": "initMOViewer", "sinorg": "initInorganic", "sretro": "initRetro", "scustomflash": "initCustomFlash", "sphase": "initPhase", "smap": "initConceptMap", "senergia": "initEnergyDiagrams", "sstudypath": "initStudyPath",
+      "snotes": "initNotes",
+      "sstats": "initStats",
+      "stheory": "initTheory",
+      "srisorse": "initResources",
+      "smoldraw": "initMolEditor",
+      "sirvis": "initIRVis",
+      "sms": "initMS",
+      "sglyc": "initMet",
+      "smo": "initMO",
+      "spka": "initPKA",
+      "sdint": "initDrugInteractions",
+      "spkcalc": "initPKCalc",
+      "sclinical": "initClinical",
+      "snoe": "initNOE",
+      "suvvis": "initUVVis",
+      "svsepr": "initVSEPR",
+      "smm": "initMM",
+      "snernst": "initNernst"
+    };
     var fn = initMap[sec];
     if(fn && typeof window[fn] === 'function'){
       setTimeout(function(){ window[fn](); }, 50);
@@ -21249,15 +21345,6 @@ console.log('✅ DB farmaci completo: ' + Object.keys(D).length + ' schede');
 })();
 
 </script>
-
-// ALIAS RESOLUTION
-(function(){
-var D=window.DRUG_CLINICAL_DB;
-var aliases={"Levotiroxina (T4)": "Levotiroxina", "Metotrexato (MTX) — Reumatologia": "Metotrexato", "Imatinib (uso allargato)": "Imatinib (Gleevec)", "Omeprazolo (PPI)": "Omeprazolo", "Sofosbuvir (Sovaldi) + DAA HCV": "Sofosbuvir", "Taxolo (Paclitaxel)": "Paclitaxel (Taxolo)"};
-Object.keys(aliases).forEach(function(k){if(!D[k]&&D[aliases[k]])D[k]=D[aliases[k]];});
-console.log("[BioSpec] DRUG_CLINICAL_DB total:",Object.keys(D).length);
-})();
-
 <!-- ══ SECTION: IR SPETTRI VISIVI ══════════════════════════════════════ -->
 <div id="sirvis" class="section">
   <div class="section-title">📈 SPETTRI IR VISIVI — Gruppi Funzionali</div>
@@ -24346,6 +24433,96 @@ window.initMolEditor = initMolEditor;
 
 })();
 
+</script>
+<script>
+// ── DOWNLOAD APP ──────────────────────────────────────────────
+function downloadApp(){
+  try {
+    var html = document.documentElement.outerHTML;
+    var blob = new Blob([html], {type: 'text/html;charset=utf-8'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'BioSpecInfo_v10.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
+  } catch(e) {
+    // Fallback: link to raw GitHub
+    window.open('https://raw.githubusercontent.com/samupropio1-ship-it/BioSpecInfo-/main/BioSpecInfo.html','_blank');
+  }
+}
+</script>
+<script>
+// ALIAS RESOLUTION
+(function(){
+var D=window.DRUG_CLINICAL_DB;
+var aliases={"Levotiroxina (T4)": "Levotiroxina", "Metotrexato (MTX) — Reumatologia": "Metotrexato", "Imatinib (uso allargato)": "Imatinib (Gleevec)", "Omeprazolo (PPI)": "Omeprazolo", "Sofosbuvir (Sovaldi) + DAA HCV": "Sofosbuvir", "Taxolo (Paclitaxel)": "Paclitaxel (Taxolo)"};
+Object.keys(aliases).forEach(function(k){if(!D[k]&&D[aliases[k]])D[k]=D[aliases[k]];});
+console.log("[BioSpec] DRUG_CLINICAL_DB total:",Object.keys(D).length);
+})();
+</script>
+<script>
+// ── NAV GROUP SYSTEM ────────────────────────────────────────────
+function switchNavGroup(idx){
+  document.querySelectorAll('.nav-group-tab').forEach(function(t,i){
+    t.style.background = i===idx ? 'var(--primary)' : 'none';
+    t.style.color = i===idx ? '#fff' : 'var(--text3)';
+    t.style.borderColor = i===idx ? 'var(--primary)' : 'var(--g200)';
+  });
+  document.querySelectorAll('.nav-group-panel').forEach(function(p,i){
+    p.style.display = i===idx ? 'flex' : 'none';
+  });
+}
+
+function filterNavSearch(val){
+  var v = val.toLowerCase().trim();
+  var results = document.getElementById('navSearchResults');
+  var tabs = document.getElementById('navGroupTabs');
+  var panels = document.querySelectorAll('.nav-group-panel');
+  var clear = document.getElementById('navSearchClear');
+  if(!v){
+    results.style.display='none';
+    tabs.style.display='flex';
+    panels.forEach(function(p,i){ p.style.display=i===0?'flex':'none'; });
+    clear.style.display='none';
+    return;
+  }
+  clear.style.display='block';
+  // Collect matching buttons
+  var all = document.querySelectorAll('.nav-btn');
+  var matches = [];
+  all.forEach(function(b){
+    if(b.textContent.toLowerCase().indexOf(v)>=0 || (b.getAttribute('data-s')||'').indexOf(v)>=0){
+      matches.push(b.cloneNode(true));
+    }
+  });
+  results.style.display='flex';
+  tabs.style.display='none';
+  panels.forEach(function(p){ p.style.display='none'; });
+  results.innerHTML='';
+  if(!matches.length){
+    results.innerHTML='<span style="color:var(--text3);font-size:12px;padding:6px">Nessuna sezione trovata</span>';
+    return;
+  }
+  matches.forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var sec = btn.getAttribute('data-s');
+      // Trigger original nav click on the real button
+      var real = document.querySelector('.nav-btn[data-s="'+sec+'"]');
+      if(real && real !== btn){ real.click(); }
+      clearNavSearch();
+    });
+    results.appendChild(btn);
+  });
+}
+
+function clearNavSearch(){
+  var inp = document.getElementById('navSearch');
+  if(inp) inp.value='';
+  filterNavSearch('');
+}
 </script>
 </body>
 </html>
