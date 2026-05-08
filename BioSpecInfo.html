@@ -10842,6 +10842,7 @@ function activateLicenseDemo(email, months){
 
 // ── UI PRO BADGE E MODAL ──────────────────────────────────────────
 function injectProUI(){
+  if(document.getElementById('proBadgeBtn')) return; // guard
   var proStatus = isPro();
   var trialDays = isTrialActive();
 
@@ -11779,6 +11780,7 @@ function updatePomoSessions(){
 
 // Aggiungi il pulsante Pomodoro all'header
 document.addEventListener('DOMContentLoaded', function(){
+  if(document.getElementById('pomodoroBtn')) return; // guard
   var shareBtn = document.getElementById('shareBtn');
   if(shareBtn){
     var pomoBtn = document.createElement('button');
@@ -13150,6 +13152,7 @@ function goSection(sid){
 
 // Aggiungi pulsante di ricerca globale nell'header
 document.addEventListener('DOMContentLoaded', function(){
+  if(document.getElementById('globalSearchBtn')) return; // guard
   var shareBtn = document.getElementById('shareBtn');
   if(shareBtn){
     var searchBtn = document.createElement('button');
@@ -19960,6 +19963,23 @@ else{initPWA();}
 </script>
 <script>
 window.showInstallGuide = function(){
+  var currentUrl = window.location.href;
+  var isLocal = currentUrl.startsWith('content://') || currentUrl.startsWith('file://') || currentUrl.startsWith('blob:');
+  if(isLocal){
+    // Local file: can't install PWA — redirect to GitHub Pages
+    var githubUrl = 'https://samupropio1-ship-it.github.io/BioSpecInfo-/';
+    var msg = document.createElement('div');
+    msg.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+    msg.innerHTML = '<div style="background:#1a2840;border-radius:16px;padding:28px;max-width:380px;width:100%;text-align:center">'
+      +'<div style="font-size:2.5rem;margin-bottom:12px">\uD83D\uDCF2</div>'
+      +'<div style="color:#00d4aa;font-size:1.1rem;font-weight:700;margin-bottom:8px">Per installare l\u2019app</div>'
+      +'<div style="color:#e2e8f0;font-size:0.9rem;margin-bottom:18px;line-height:1.5">L\u2019installazione richiede la versione online.<br>Visita il sito e usa Installa App da l\u00ec.</div>'
+      +'<a href="'+githubUrl+'" style="display:block;background:#1B5E20;color:#fff;text-decoration:none;padding:12px;border-radius:10px;font-weight:700;margin-bottom:10px">\uD83C\uDF10 Apri BioSpecInfo Online</a>'
+      +'<button onclick="this.parentElement.parentElement.remove()" style="background:#334155;color:#94a3b8;border:none;padding:10px 24px;border-radius:8px;cursor:pointer;width:100%">Chiudi</button>'
+      +'</div>';
+    document.body.appendChild(msg);
+    return;
+  }
   var ua = navigator.userAgent;
   var isAndroid = /android/i.test(ua);
   var isIOS = /iphone|ipad|ipod/i.test(ua);
