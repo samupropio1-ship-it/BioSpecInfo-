@@ -24444,30 +24444,7 @@ window.initMolEditor = initMolEditor;
 })();
 
 </script>
-<script>
-// ── DOWNLOAD APP ──────────────────────────────────────────────
-function downloadApp(){
-  // Clear service worker cache first for fresh download
-  if(navigator.serviceWorker && navigator.serviceWorker.controller){
-    navigator.serviceWorker.controller.postMessage({type:"CLEAR_CACHE"});
-  }
-  try {
-    var html = document.documentElement.outerHTML;
-    var blob = new Blob([html], {type: 'text/html;charset=utf-8'});
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = 'BioSpecInfo_v10.html';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
-  } catch(e) {
-    // Fallback: link to raw GitHub
-    window.open('https://raw.githubusercontent.com/samupropio1-ship-it/BioSpecInfo-/main/BioSpecInfo.html','_blank');
-  }
-}
-</script>
+
 <script>
 // ALIAS RESOLUTION
 (function(){
@@ -26237,150 +26214,146 @@ console.log('Protein 3D Canvas viewer loaded ✓');
 </script>
 
 
+
 <script>
-// BioSpecInfo PWA — installazione diretta
+// BioSpecInfo PWA — Self-Contained (SW serve manifest e icone)
 // © 2025 Samuele Pio Provenzano
 (function(){
 
-var _evt = null; // beforeinstallprompt event
+var ICON192 = 'data:image/png;base64,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';
+var ICON512 = 'data:image/png;base64,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';
+var MANIFEST_JSON = "{\"name\": \"BioSpecInfo \u2014 Chimica Interattiva\", \"short_name\": \"BioSpecInfo\", \"start_url\": \"./BioSpecInfo.html\", \"scope\": \"./\", \"display\": \"standalone\", \"background_color\": \"#1B5E20\", \"theme_color\": \"#1B5E20\", \"lang\": \"it\", \"prefer_related_applications\": false, \"icons\": [{\"src\": \"./icon-192.png\", \"sizes\": \"192x192\", \"type\": \"image/png\", \"purpose\": \"any\"}, {\"src\": \"./icon-512.png\", \"sizes\": \"512x512\", \"type\": \"image/png\", \"purpose\": \"any maskable\"}]}";
 
-// 1. Cattura il prompt nativo di Chrome
-window.addEventListener('beforeinstallprompt', function(e){
-  e.preventDefault();
-  _evt = e;
-  // Mostra il pulsante header verde acceso
-  var btn = document.getElementById('installBtn');
-  if(btn){
-    btn.style.background = '#2E7D32';
-    btn.style.color = '#fff';
-    btn.style.border = '2px solid #fff';
-    btn.style.animation = 'bsiPulse 1.5s infinite';
-  }
-  // Banner in basso dopo 1s
-  setTimeout(showBanner, 1000);
+// ── 1. Service Worker che serve manifest e icone inline ──────────────
+var SW_CODE = `
+var ICON192 = '${ICON192}';
+var ICON512 = '${ICON512}';
+var MANIFEST = ${MANIFEST_JSON};
+
+function b64toBlob(b64, type){
+  var bin = atob(b64.split(',')[1]);
+  var arr = new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+  return new Blob([arr], {type:type});
+}
+
+self.addEventListener('install', function(e){
+  self.skipWaiting();
 });
-
-// 2. Banner in basso
-function showBanner(){
-  if(document.getElementById('bsi-pwa-bar')) return;
-  if(window.matchMedia('(display-mode: standalone)').matches) return;
-  var bar = document.createElement('div');
-  bar.id = 'bsi-pwa-bar';
-  bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;'
-    + 'background:#1B5E20;color:#fff;padding:12px 16px;'
-    + 'display:flex;align-items:center;justify-content:space-between;gap:10px;'
-    + 'box-shadow:0 -3px 16px rgba(0,0,0,.4);font-family:system-ui,sans-serif;';
-  bar.innerHTML =
-    '<div style="display:flex;align-items:center;gap:10px">'
-    + '<span style="font-size:1.8rem">📲</span>'
-    + '<div><div style="font-weight:700;font-size:1rem">Installa BioSpecInfo</div>'
-    + '<div style="font-size:.8rem;opacity:.85">App chimica · funziona offline</div></div></div>'
-    + '<button id="bsi-install-yes" style="background:#fff;color:#1B5E20;border:none;'
-    + 'border-radius:10px;padding:10px 22px;font-weight:800;font-size:.95rem;cursor:pointer;'
-    + 'box-shadow:0 2px 8px rgba(0,0,0,.2)">✅ Installa</button>';
-  document.body.appendChild(bar);
-  document.getElementById('bsi-install-yes').onclick = doInstall;
-}
-
-// 3. Esegui installazione
-function doInstall(){
-  var bar = document.getElementById('bsi-pwa-bar');
-  if(bar) bar.remove();
-  if(_evt){
-    _evt.prompt();
-    _evt.userChoice.then(function(r){
-      if(r.outcome === 'accepted') _evt = null;
-    });
-  }
-}
-window.doInstall = doInstall;
-
-// 4. showInstallGuide — pulsante header
-window.showInstallGuide = function(){
-  // Se il prompt nativo è disponibile → installazione diretta
-  if(_evt){ doInstall(); return; }
-
-  // Già installata
-  if(window.matchMedia('(display-mode: standalone)').matches || navigator.standalone){
-    alert('✅ BioSpecInfo è già installata!'); return;
-  }
-
-  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  var isLocal = location.protocol === 'file:' || location.protocol === 'content:';
-
-  if(isLocal){
-    if(confirm('Apri la versione online per installare l\'app?\n\nhttps://samupropio1-ship-it.github.io/BioSpecInfo-/BioSpecInfo.html')){
-      location.href='https://samupropio1-ship-it.github.io/BioSpecInfo-/BioSpecInfo.html';
-    }
+self.addEventListener('activate', function(e){
+  self.clients.claim();
+});
+self.addEventListener('fetch', function(e){
+  var url = e.request.url;
+  if(url.endsWith('/manifest.json')|| url.includes('manifest.json')){
+    e.respondWith(new Response(JSON.stringify(MANIFEST),
+      {headers:{'Content-Type':'application/manifest+json'}}));
     return;
   }
-
-  var ov = document.createElement('div');
-  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;'
-    + 'display:flex;align-items:flex-end;justify-content:center;padding:16px;';
-
-  var isChrome = /chrome/i.test(navigator.userAgent) && !/safari/i.test(navigator.userAgent.replace(/chrome/i,''));
-
-  var card = isIOS
-    ? '<div style="background:#fff;border-radius:20px;padding:28px;max-width:400px;width:100%;text-align:center">'
-      + '<div style="font-size:2.5rem;margin-bottom:12px">📱</div>'
-      + '<div style="font-weight:800;color:#1B5E20;font-size:1.1rem;margin-bottom:20px">Installa su iPhone / iPad</div>'
-      + '<div style="background:#f0f9f5;border-radius:12px;padding:16px;text-align:left;font-size:.95rem;line-height:2.4;color:#1a3a2a;margin-bottom:20px">'
-      + '<b>1.</b> Tocca <b>⬆️ Condividi</b> in basso<br>'
-      + '<b>2.</b> Tocca <b>"Aggiungi a schermata Home"</b><br>'
-      + '<b>3.</b> Tocca <b>Aggiungi</b> ✓'
-      + '</div>'
-      + '<button id="bsi-ok-btn" style="background:#1B5E20;color:#fff;border:none;padding:14px;border-radius:12px;cursor:pointer;width:100%;font-weight:800;font-size:1rem">Ho capito!</button>'
-      + '</div>'
-    : '<div style="background:#fff;border-radius:20px;padding:28px;max-width:400px;width:100%;text-align:center">'
-      + '<div style="font-size:2.5rem;margin-bottom:12px">📲</div>'
-      + '<div style="font-weight:800;color:#1B5E20;font-size:1.1rem;margin-bottom:20px">Installa BioSpecInfo</div>'
-      + '<div style="background:#f0f9f5;border-radius:12px;padding:16px;text-align:left;font-size:.95rem;line-height:2.4;color:#1a3a2a;margin-bottom:20px">'
-      + '<b>Android Chrome:</b><br>'
-      + '&nbsp; Tocca <b>⋮</b> → <b>"Aggiungi a schermata Home"</b><br>'
-      + '<b>Desktop Chrome/Edge:</b><br>'
-      + '&nbsp; Barra URL → icona <b>⊕</b> → <b>"Installa"</b>'
-      + '</div>'
-      + '<button id="bsi-ok-btn" style="background:#1B5E20;color:#fff;border:none;padding:14px;border-radius:12px;cursor:pointer;width:100%;font-weight:800;font-size:1rem">OK</button>'
-      + '</div>';
-
-  ov.innerHTML = card;
-  ov.addEventListener('click', function(e){ if(e.target===ov) ov.remove(); });
-  document.body.appendChild(ov);
-  var okBtn = document.getElementById('bsi-ok-btn');
-  if(okBtn) okBtn.onclick = function(){ ov.remove(); };
-};
-
-// 5. App installata → nascondi pulsante
-window.addEventListener('appinstalled', function(){
-  var bar = document.getElementById('bsi-pwa-bar');
-  if(bar) bar.remove();
-  var btn = document.getElementById('installBtn');
-  if(btn) btn.style.display = 'none';
-  // Toast conferma
-  var t = document.createElement('div');
-  t.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);'
-    + 'background:#1B5E20;color:#fff;padding:12px 24px;border-radius:12px;'
-    + 'z-index:9999;font-weight:700;font-size:1rem;box-shadow:0 4px 20px rgba(0,0,0,.3)';
-  t.textContent = '✅ BioSpecInfo installata con successo!';
-  document.body.appendChild(t);
-  setTimeout(function(){ t.remove(); }, 4000);
+  if(url.endsWith('/icon-192.png')||url.includes('icon-192.png')){
+    e.respondWith(new Response(b64toBlob(ICON192,'image/png'),
+      {headers:{'Content-Type':'image/png'}}));
+    return;
+  }
+  if(url.endsWith('/icon-512.png')||url.includes('icon-512.png')){
+    e.respondWith(new Response(b64toBlob(ICON512,'image/png'),
+      {headers:{'Content-Type':'image/png'}}));
+    return;
+  }
+  e.respondWith(fetch(e.request).catch(function(){
+    return caches.match('./BioSpecInfo.html');
+  }));
 });
+`;
 
-// 6. Registra Service Worker
+// Sostituisci placeholder con i valori reali
+SW_CODE = SW_CODE
+  .replace('${ICON192}', ICON192)
+  .replace('${ICON512}', ICON512)
+  .replace('${MANIFEST_JSON}', MANIFEST_JSON);
+
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./sw.js', {scope:'./'})
-    .then(function(r){ console.log('SW ok:', r.scope); })
+  var blob = new Blob([SW_CODE], {type:'application/javascript'});
+  var swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl, {scope:'./'})
+    .then(function(r){
+      console.log('SW ok:', r.scope);
+      // Dopo registrazione, ricarica per far intercettare il manifest
+      if(r.active && !sessionStorage.getItem('sw-ready')){
+        sessionStorage.setItem('sw-ready','1');
+        // Il manifest sarà intercettato al prossimo caricamento
+      }
+    })
     .catch(function(e){ console.warn('SW:', e.message); });
 }
 
-// 7. CSS animazione pulsante
-var style = document.createElement('style');
-style.textContent = '@keyframes bsiPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}';
-document.head.appendChild(style);
+// ── 2. beforeinstallprompt ───────────────────────────────────────────
+var _evt = null;
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  _evt = e;
+  var btn = document.getElementById('installBtn');
+  if(btn){
+    btn.style.cssText += ';background:#fff!important;color:#1B5E20!important;font-weight:900;animation:bsiPulse 1s infinite;border:2px solid #fff!important;';
+  }
+  setTimeout(function(){
+    if(document.getElementById('bsi-bar')) return;
+    var bar = document.createElement('div');
+    bar.id = 'bsi-bar';
+    bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#1B5E20,#2E7D32);color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 -4px 20px rgba(0,0,0,.4);font-family:system-ui,sans-serif;';
+    bar.innerHTML = '<div style="display:flex;align-items:center;gap:12px"><span style="font-size:2rem">📲</span><div><div style="font-weight:800;font-size:1.05rem">Installa BioSpecInfo</div><div style="font-size:.8rem;opacity:.85">App chimica • funziona offline</div></div></div><button id="bsi-yes" style="background:#fff;color:#1B5E20;border:none;border-radius:12px;padding:12px 26px;font-weight:900;font-size:1rem;cursor:pointer;white-space:nowrap">✅ Installa</button>';
+    document.body.appendChild(bar);
+    document.getElementById('bsi-yes').onclick = doInstall;
+  }, 500);
+});
+
+function doInstall(){
+  var bar = document.getElementById('bsi-bar');
+  if(bar) bar.remove();
+  if(_evt){ _evt.prompt(); _evt.userChoice.then(function(){ _evt=null; }); }
+}
+
+window.addEventListener('appinstalled', function(){
+  var bar = document.getElementById('bsi-bar');
+  if(bar) bar.remove();
+  var btn = document.getElementById('installBtn');
+  if(btn) btn.style.display='none';
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1B5E20;color:#fff;padding:14px 28px;border-radius:14px;z-index:9999;font-weight:800;font-size:1.05rem;box-shadow:0 6px 24px rgba(0,0,0,.3)';
+  t.textContent='✅ Installata!';
+  document.body.appendChild(t);
+  setTimeout(function(){t.remove();},3500);
+});
+
+// ── 3. showInstallGuide ──────────────────────────────────────────────
+window.showInstallGuide = function(){
+  if(_evt){ doInstall(); return; }
+  if(window.matchMedia('(display-mode:standalone)').matches||navigator.standalone){
+    var t=document.createElement('div');
+    t.style.cssText='position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1B5E20;color:#fff;padding:12px 24px;border-radius:12px;z-index:9999;font-weight:700';
+    t.textContent='✅ App già installata!';
+    document.body.appendChild(t);
+    setTimeout(function(){t.remove();},2500);
+    return;
+  }
+  var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;display:flex;align-items:flex-end;justify-content:center;padding:16px;';
+  ov.innerHTML=isIOS
+    ?'<div style="background:#fff;border-radius:22px;padding:30px;max-width:400px;width:100%;text-align:center"><div style="font-size:2.8rem;margin-bottom:14px">📱</div><div style="font-weight:800;color:#1B5E20;font-size:1.15rem;margin-bottom:20px">Installa su iPhone/iPad</div><div style="background:#f0f9f5;border-radius:14px;padding:18px;text-align:left;font-size:.98rem;line-height:2.6;color:#1a3a2a;margin-bottom:22px"><b>1.</b> Tocca <b>⬆️ Condividi</b> in basso<br><b>2.</b> Tocca <b>"Aggiungi a schermata Home"</b><br><b>3.</b> Tocca <b>Aggiungi</b> ✓</div><button id="bsi-ok" style="background:#1B5E20;color:#fff;border:none;padding:15px;border-radius:14px;cursor:pointer;width:100%;font-weight:800;font-size:1.05rem">Ho capito!</button></div>'
+    :'<div style="background:#fff;border-radius:22px;padding:30px;max-width:400px;width:100%;text-align:center"><div style="font-size:2.8rem;margin-bottom:14px">📲</div><div style="font-weight:800;color:#1B5E20;font-size:1.15rem;margin-bottom:20px">Installa BioSpecInfo</div><div style="background:#f0f9f5;border-radius:14px;padding:18px;text-align:left;font-size:.98rem;line-height:2.6;color:#1a3a2a;margin-bottom:22px">Su <b>Android Chrome</b>:<br>&nbsp;⋮ Menu → <b>"Aggiungi a schermata Home"</b><br>Su <b>Chrome Desktop</b>:<br>&nbsp;Icona <b>⊕</b> barra URL → <b>Installa</b></div><button id="bsi-ok" style="background:#1B5E20;color:#fff;border:none;padding:15px;border-radius:14px;cursor:pointer;width:100%;font-weight:800;font-size:1.05rem">OK</button></div>';
+  ov.addEventListener('click',function(e){if(e.target===ov)ov.remove();});
+  document.body.appendChild(ov);
+  var ok=document.getElementById('bsi-ok');
+  if(ok) ok.onclick=function(){ov.remove();};
+};
+
+// ── 4. CSS pulsante ──────────────────────────────────────────────────
+var s=document.createElement('style');
+s.textContent='@keyframes bsiPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.7)}70%{box-shadow:0 0 0 8px rgba(255,255,255,0)}}';
+document.head.appendChild(s);
 
 })();
-
 </script>
 </body>
 </html>
