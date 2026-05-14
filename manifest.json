@@ -1,22 +1,15 @@
 {
   "name": "BioSpecInfo — Chimica Interattiva",
   "short_name": "BioSpecInfo",
-  "description": "Molecole 3D, Farmaci, Sintesi Organica, Tavola Periodica, Quiz Laurea",
+  "description": "Molecole 3D, Farmaci, Sintesi Organica, Tavola Periodica, Quiz Laurea. Gratuito e offline.",
   "start_url": "./BioSpecInfo.html",
   "scope": "./",
   "display": "standalone",
-  "display_override": [
-    "standalone",
-    "minimal-ui"
-  ],
   "orientation": "any",
   "background_color": "#1B5E20",
   "theme_color": "#1B5E20",
   "lang": "it",
   "prefer_related_applications": false,
-  "categories": [
-    "education"
-  ],
   "icons": [
     {
       "src": "./icon-192.png",
@@ -28,19 +21,19 @@
       "src": "./icon-192.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     }
   ],
-  "shortcuts": [
+  "screenshots": [
     {
-      "name": "Cerca Molecola",
-      "url": "./BioSpecInfo.html#smol",
-      "description": "Cerca una molecola"
-    },
-    {
-      "name": "Farmaci",
-      "url": "./BioSpecInfo.html#sfarm",
-      "description": "Database farmaci"
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "form_factor": "narrow"
     }
+  ],
+  "categories": [
+    "education",
+    "productivity"
   ]
 }
