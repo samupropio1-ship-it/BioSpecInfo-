@@ -1,6 +1,54 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+<script>
+// Auto-redirect notice for local files
+(function(){
+  var proto = location.protocol;
+  var isLocal = proto === 'file:' || proto === 'content:';
+  if(!isLocal) return;
+  
+  // Show a persistent banner at the top
+  document.addEventListener('DOMContentLoaded', function(){
+    var bar = document.createElement('div');
+    bar.id = 'local-notice';
+    bar.style.cssText = [
+      'position:fixed;top:0;left:0;right:0;z-index:99999',
+      'background:#1B5E20;color:#fff',
+      'padding:10px 16px',
+      'display:flex;align-items:center;justify-content:space-between;gap:10px',
+      'font-family:system-ui,sans-serif;font-size:13px',
+      'box-shadow:0 2px 8px rgba(0,0,0,.4)'
+    ].join(';');
+    
+    bar.innerHTML = ''
+      + '<div style="display:flex;align-items:center;gap:8px">'
+      + '<span style="font-size:1.2rem">📱</span>'
+      + '<div>'
+      + '<div style="font-weight:700">Per installare come App apri su GitHub Pages</div>'
+      + '<div style="font-size:.75rem;opacity:.85">file locale: installazione PWA non disponibile</div>'
+      + '</div>'
+      + '</div>'
+      + '<a href="https://samupropio1-ship-it.github.io/BioSpecInfo-/BioSpecInfo.html" '
+      + 'style="background:#fff;color:#1B5E20;text-decoration:none;padding:7px 14px;'
+      + 'border-radius:8px;font-weight:700;font-size:.85rem;white-space:nowrap;flex-shrink:0">'
+      + '🌐 Apri Online</a>';
+    
+    // Insert after header if possible, else at top of body
+    var hdr = document.getElementById('hdr');
+    if(hdr && hdr.parentNode){
+      hdr.parentNode.insertBefore(bar, hdr.nextSibling);
+      // Push content down
+      hdr.style.top = '0';
+      var nav = document.getElementById('navWrapper');
+      if(nav) nav.style.top = '48px';
+    } else {
+      document.body.insertBefore(bar, document.body.firstChild);
+    }
+  });
+})();
+</script>
+
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -26127,13 +26175,9 @@ window.showInstallGuide = function(){
 
   var card;
   if(isLocal){
-    card = '<div style="background:#fff;border-radius:16px;padding:24px;max-width:380px;width:100%;text-align:center;margin-bottom:env(safe-area-inset-bottom,0)">'
-      + '<div style="font-size:2.2rem;margin-bottom:10px">🌐</div>'
-      + '<div style="font-weight:700;color:#1B5E20;font-size:1rem;margin-bottom:8px">Apri online per installare</div>'
-      + '<div style="color:#4b5563;font-size:.85rem;margin-bottom:18px;line-height:1.6">L\'installazione PWA richiede HTTPS.<br>Visita la versione su GitHub Pages.</div>'
-      + '<a href="'+GH_URL+'" style="display:block;background:#1B5E20;color:#fff;text-decoration:none;padding:12px;border-radius:10px;font-weight:700;margin-bottom:10px">🔗 Apri BioSpecInfo Online</a>'
-      + '<button onclick="this.closest(\'[style*=inset]\').remove()" style="background:#f3f4f6;color:#6b7280;border:none;padding:10px;border-radius:10px;cursor:pointer;width:100%">Chiudi</button>'
-      + '</div>';
+    // File locale: apri direttamente su GitHub Pages
+    window.location.href = GH_URL;
+    return;
   } else if(isIOS){
     card = '<div style="background:#fff;border-radius:16px;padding:24px;max-width:380px;width:100%;text-align:center;margin-bottom:env(safe-area-inset-bottom,0)">'
       + '<div style="font-size:2.2rem;margin-bottom:10px">📱</div>'
