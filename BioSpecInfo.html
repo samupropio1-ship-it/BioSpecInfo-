@@ -26279,22 +26279,21 @@ injectManifest();
 // ── 2. Service Worker via Blob URL ────────────────────
 function registerSW(){
   if(!('serviceWorker' in navigator)) return;
-  var SW = [
-    "var CACHE='bsi-v10';",
-    "self.addEventListener('install',function(e){self.skipWaiting();});",
-    "self.addEventListener('activate',function(e){self.clients.claim();});",
-    "self.addEventListener('fetch',function(e){",
-    "  if(e.request.method!=='GET')return;",
-    "  e.respondWith(fetch(e.request).catch(function(){return caches.match(e.request);}));",
-    "});"
-  ].join('\n');
-  try {
-    var blob = new Blob([SW], {type: 'application/javascript'});
-    var url = URL.createObjectURL(blob);
-    navigator.serviceWorker.register(url, {scope: './'})
-      .then(function(r){ console.log('SW ok:', r.scope); })
-      .catch(function(e){ console.warn('SW skip:', e.message); });
-  } catch(e) {}
+  // sw.js esterno = PWA vera (non scorciatoia)
+  navigator.serviceWorker.register('./sw.js',{scope:'./'})
+    .then(function(r){ console.log('SW ok app:', r.scope); })
+    .catch(function(){
+      // Fallback blob solo se sw.js non trovato
+      try{
+        var SW=["var CACHE='bsi-v10';",
+          "self.addEventListener('install',function(e){self.skipWaiting();});",
+          "self.addEventListener('activate',function(e){self.clients.claim();});",
+          "self.addEventListener('fetch',function(e){if(e.request.method!=='GET')return;e.respondWith(fetch(e.request).catch(function(){return caches.match(e.request);}));});"
+        ].join('\n');
+        var blob=new Blob([SW],{type:'application/javascript'});
+        navigator.serviceWorker.register(URL.createObjectURL(blob),{scope:'./'});
+      }catch(e2){ console.warn('SW fallback failed'); }
+    });
 }
 registerSW();
 
