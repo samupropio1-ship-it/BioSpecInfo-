@@ -667,6 +667,7 @@ input::placeholder, textarea::placeholder { color: #888888; }
       <button class="hdr-ico" onclick="if(typeof openBSIGuide==='function')openBSIGuide(0)" title="Guida al sito">❓</button>
       <button class="hdr-ico" id="shareBtn" title="Condividi">🔗</button>
       <button class="hdr-ico" id="downloadBtn" onclick="downloadBioSpecInfo()" title="Scarica BioSpecInfo.html" style="color:#6bcfff;border-color:#1565C0">⬇️</button>
+      <button class="hdr-ico" id="installBtn" onclick="showAddToHome()" title="Aggiungi a schermata Home" style="color:var(--g300);border-color:var(--g200)">📲</button>
       
     </div>
   </div>
@@ -24969,7 +24970,10 @@ window.calcMolProps = function() {
   <div id="serrori-inner"></div>
 </div>
 <div id="ssteich" class="section"></div>
-<div id="spubchem" class="section"></div>
+<div id="spubchem" class="section"><
+<div id="sdashboard" class="section">
+  <div id="sdash-inner"></div>
+</div>/div>
 </div>
 
 
@@ -26263,6 +26267,15 @@ window.downloadMaterial = function(type){
   // Navigate to section and print
   var navBtn = document.querySelector('[data-s="'+sec+'"]');
   if(navBtn){ navBtn.click(); setTimeout(function(){ window.print(); }, 1000); }
+};
+</script>
+<script>
+window.showAddToHome = function(){
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var msg = isIOS
+    ? '📱 iPhone/iPad:\n\n1. Tocca ⬆️ Condividi\n2. Scorri e tocca "Aggiungi a schermata Home"\n3. Tocca Aggiungi'
+    : '📲 Android Chrome:\n\nTocca ⋮ (tre puntini in alto)\npoi "Aggiungi a schermata Home"\n\n🖥️ Desktop:\nIcona ⊕ nella barra URL → Installa';
+  alert(msg);
 };
 </script>
 </body>
