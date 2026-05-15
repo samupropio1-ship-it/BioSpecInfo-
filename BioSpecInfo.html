@@ -26278,5 +26278,84 @@ window.showAddToHome = function(){
   alert(msg);
 };
 </script>
+<script>
+// INIT FUNCTIONS RIPRISTINATE v10.4
+// (c) 2025 Samuele Pio Provenzano
+
+window.initErroriComuni = function(){
+  var sec=document.getElementById('serrori');
+  if(!sec||sec._built)return; sec._built=true;
+  if(typeof window.initRiassunti==='function'){window.initRiassunti();return;}
+  sec.innerHTML='<div class="section-title">Riassunti e Mappe Concettuali</div>'
+    +'<div style="background:var(--g50);border-radius:12px;padding:14px">'
+    +'<div class="srow"><input type="text" id="riass-inp" placeholder="es. Ciclo di Krebs, NMR...">'
+    +'<button class="go" onclick="var v=document.getElementById(\'riass-inp\').value;if(v&&typeof window._generateRiassunto===\'function\')window._generateRiassunto(v,\'riassunto\')">Genera</button></div>'
+    +'<div id="riassuntoOutput" style="margin-top:12px;min-height:60px;background:var(--white);border:1px solid var(--g200);border-radius:8px;padding:12px;color:var(--text2)">Inserisci un argomento e clicca Genera</div>'
+    +'</div>';
+};
+
+window.initStechio = function(){
+  var sec=document.getElementById('ssteich');
+  if(!sec||sec._built)return; sec._built=true;
+  sec.innerHTML='<div class="section-title">Bilanciamento Equazioni - Stechiometria</div>'
+    +'<div style="background:var(--g50);border-radius:12px;padding:14px;margin-bottom:12px">'
+    +'<div class="srow"><input type="text" id="steich-inp" placeholder="H2 + O2 = H2O">'
+    +'<button class="go" onclick="(function(){var q=document.getElementById(\'steich-inp\').value.trim();if(!q)return;document.getElementById(\'steich-result\').innerHTML=\'<div style=background:var(--white);border:1px solid var(--g200);border-radius:10px;padding:14px>Equazione: <b>\'+q+\'</b><br><br><span style=color:var(--text2);font-size:.85rem>Per il bilanciamento automatico usa la sezione Calcolatore o il pulsante qui sotto</span><br><br><a href=https://www.wolframalpha.com/input?i=balance+\'+encodeURIComponent(q)+\' target=_blank style=color:var(--g700)>Bilancia su WolframAlpha</a></div>\';})()">Bilancia</button></div>'
+    +'</div><div id="steich-result"></div>';
+};
+
+window.initPubChem = function(){
+  var sec=document.getElementById('spubchem');
+  if(!sec||sec._built)return; sec._built=true;
+  sec.innerHTML='<div class="section-title">PubChem - Ricerca Avanzata</div>'
+    +'<div style="background:var(--g50);border-radius:12px;padding:14px;margin-bottom:12px">'
+    +'<div class="srow"><input type="text" id="pc-inp" placeholder="es. aspirina, CID 2244, C9H8O4">'
+    +'<button class="go" onclick="(function(){var q=document.getElementById(\'pc-inp\').value.trim();if(!q)return;var qi=document.getElementById(\'qi\');if(qi)qi.value=q;var b=document.querySelector(\'[data-s=smol]\');if(b)b.click();setTimeout(function(){if(typeof go===\'function\')go();},300);})()">Cerca</button></div>'
+    +'</div>';
+};
+
+window.initDashboard = function(){
+  var sec=document.getElementById('sdashboard');
+  if(!sec||sec._built)return; sec._built=true;
+  var farmCount=typeof DRUGS!=='undefined'?DRUGS.length:143;
+  var rxnCount=typeof RXN!=='undefined'?RXN.length:289;
+  function navTo(id){var b=document.querySelector('[data-s="'+id+'"]');if(b)b.click();}
+  sec.innerHTML='<div class="section-title">Dashboard - BioSpecInfo</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:16px">'
+    +[['Farmaci',farmCount,'sfarm'],['Sintesi',rxnCount,'ssyn'],['Elementi','118','spt'],
+      ['Formule','299','sform'],['Amminoacidi','67','saa'],['Sezioni','56','smol']
+    ].map(function(d){
+      return '<div class="panel" style="text-align:center;cursor:pointer" onclick="(function(){var b=document.querySelector(\'[data-s=&quot;'+d[2]+'&quot;]\');if(b)b.click();})() ">'
+        +'<div style="font-size:1.8rem;font-weight:900;color:var(--g900)">'+d[1]+'</div>'
+        +'<div style="font-size:.85rem;color:var(--text2)">'+d[0]+'</div></div>';
+    }).join('')+'</div>'
+    +'<div class="panel"><div class="ph">Navigazione Rapida</div><div class="pb" style="display:flex;flex-wrap:wrap;gap:6px">'
+    +[['Molecola','smol'],['Farmaci','sfarm'],['Sintesi','ssyn'],['Tavola Periodica','spt'],
+      ['Strutture 3D','sstruct'],['Quiz','squiz'],['Note','snotes'],['Materiali','smateriali']
+    ].map(function(s){
+      return '<button onclick="(function(){var b=document.querySelector(\'[data-s=&quot;'+s[1]+'&quot;]\');if(b)b.click();})()" style="background:var(--g100);border:1px solid var(--g200);border-radius:8px;padding:5px 12px;cursor:pointer;font-size:.82rem;color:var(--g900)">'+s[0]+'</button>';
+    }).join('')+'</div></div>';
+};
+
+window.initMateriali = function(){
+  var sec=document.getElementById('smateriali');
+  if(!sec||sec._built)return; sec._built=true;
+  sec.innerHTML='<div class="section-title">Materiali Didattici</div>'
+    +'<div style="background:var(--g50);border-radius:12px;padding:14px;margin-bottom:14px">'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px">'
+    +[['Tabelle Spettroscopiche','sspec'],['Schede Farmaci (143)','sfarm'],
+      ['Formulario (299)','sform'],['Amminoacidi (67)','saa'],
+      ['Sintesi (289)','ssyn'],['Tavola Periodica','spt']
+    ].map(function(d){
+      return '<div class="panel" style="cursor:pointer" onclick="(function(){var b=document.querySelector(\'[data-s=&quot;'+d[1]+'&quot;]\');if(b)b.click();})()">'
+        +'<div class="ph">'+d[0]+'</div><div class="pb" style="font-size:.8rem;color:var(--text2)">Clicca per aprire</div></div>';
+    }).join('')+'</div></div>'
+    +'<div class="panel"><div class="ph">Esporta / Scarica</div><div class="pb" style="display:flex;gap:10px;flex-wrap:wrap">'
+    +'<button onclick="window.print()" style="background:var(--g900);color:#fff;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:700">Stampa / PDF</button>'
+    +'<button onclick="if(typeof downloadBioSpecInfo===\'function\')downloadBioSpecInfo()" style="background:var(--g100);color:var(--g900);border:1px solid var(--g200);border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:700">Scarica Sito</button>'
+    +'</div></div>';
+};
+
+</script>
 </body>
 </html>
