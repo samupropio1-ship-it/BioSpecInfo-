@@ -25011,42 +25011,61 @@ window.initConfrontaMol=function(){
   var sec=document.getElementById('scompare');
   if(!sec||sec._init)return;sec._init=true;
   sec.innerHTML='<div class="section-title">⚖️ CONFRONTO MOLECOLE</div>'
+    +'<div style="background:var(--g50);border-radius:12px;padding:14px;margin-bottom:12px">'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">'
-    +'<div><label style="color:var(--c-text2);font-size:.82rem">Molecola A</label>'
-    +'<input type="text" id="cmpA" placeholder="aspirina" style="width:100%;padding:8px;margin-top:4px"></div>'
-    +'<div><label style="color:var(--c-text2);font-size:.82rem">Molecola B</label>'
-    +'<input type="text" id="cmpB" placeholder="ibuprofene" style="width:100%;padding:8px;margin-top:4px"></div>'
-    +'</div><button onclick="runComparison()" style="width:100%;background:var(--c-primary);border:none;border-radius:8px;padding:9px;color:#060d1a;cursor:pointer;font-weight:700;margin-bottom:12px">Confronta</button>'
+    +'<div><label style="color:var(--text2);font-size:.82rem;font-weight:700">Molecola A</label>'
+    +'<input type="text" id="cmpA" placeholder="es. aspirina" style="width:100%;padding:8px;margin-top:4px;border:1px solid var(--g200);border-radius:8px"></div>'
+    +'<div><label style="color:var(--text2);font-size:.82rem;font-weight:700">Molecola B</label>'
+    +'<input type="text" id="cmpB" placeholder="es. ibuprofene" style="width:100%;padding:8px;margin-top:4px;border:1px solid var(--g200);border-radius:8px"></div>'
+    +'</div>'
+    +'<button id="cmpRun" style="width:100%;background:var(--g900);color:#fff;border:none;border-radius:10px;padding:10px;font-weight:700;cursor:pointer">⚖️ Confronta</button>'
+    +'</div>'
     +'<div id="cmpResult"></div>';
+  document.getElementById('cmpRun').onclick=runComparison;
 };
-window.runComparison=async function(){
-  var a=(document.getElementById('cmpA')||{}).value||'',b=(document.getElementById('cmpB')||{}).value||'';
-  var res=document.getElementById('cmpResult');if(!a||!b||!res)return;
-  res.innerHTML='<div style="color:var(--c-text3)">⧗ Caricamento...</div>';
-  try{
-    var fa=await fetch('https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/'+encodeURIComponent(a)+'/property/MolecularFormula,MolecularWeight,XLogP,HBondDonorCount,HBondAcceptorCount,TPSA/JSON').then(function(r){return r.json();});
-    var fb=await fetch('https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/'+encodeURIComponent(b)+'/property/MolecularFormula,MolecularWeight,XLogP,HBondDonorCount,HBondAcceptorCount,TPSA/JSON').then(function(r){return r.json();});
-    var pA=(fa.PropertyTable&&fa.PropertyTable.Properties)?fa.PropertyTable.Properties[0]:{};
-    var pB=(fb.PropertyTable&&fb.PropertyTable.Properties)?fb.PropertyTable.Properties[0]:{};
-    function row(lbl,k){return '<tr><td style="color:var(--c-text2);padding:5px 8px">'+lbl+'</td><td style="color:var(--c-text1);text-align:center;padding:5px">'+(pA[k]||'—')+'</td><td style="color:var(--c-gold);text-align:center;padding:5px">'+(pB[k]||'—')+'</td></tr>';}
-    res.innerHTML='<table style="width:100%;border-collapse:collapse;background:var(--c-surface);border-radius:10px;overflow:hidden">'
-      +'<thead><tr style="background:var(--c-card)"><th style="padding:8px;color:var(--c-accent)">Prop</th><th style="color:var(--c-primary);padding:8px">'+a+'</th><th style="color:var(--c-gold);padding:8px">'+b+'</th></tr></thead><tbody>'
-      +row('Formula','MolecularFormula')+row('MW g/mol','MolecularWeight')+row('LogP','XLogP')+row('HBD','HBondDonorCount')+row('HBA','HBondAcceptorCount')+row('TPSA','TPSA')+'</tbody></table>';
-  }catch(e){res.innerHTML='<div style="color:var(--err)">Errore: '+e.message+'</div>';}
-};
-window.exportPDF=function(){
-  var sec=document.querySelector('.section.on');
-  var title=sec?(sec.querySelector('.section-title')||{}).textContent||'BioSpecInfo':'BioSpecInfo';
-  var content=sec?sec.innerHTML:'';
-  var win=window.open('','_blank');if(!win){window.print();return;}
-  var parts=['<!DOCTYPE html><html lang="it"><head><meta charset="utf-8">',
-    '<title>BioSpecInfo — ',title.replace(/[<>]/g,''),'</title>',
-    '<style>body{font-family:Arial,sans-serif;padding:20px;background:#ffffff;color:#111;font-size:13px}',
-    'canvas,button{display:none!important}</style></head><body>',
-    '<p style="font-size:10px;color:#aaa">© 2025 Samuele Pio Provenzano</p>',
-    '<h2>',title,'</h2>',content,'</body></html>'];
-  win.document.write(parts.join(''));win.document.close();
-  setTimeout(function(){win.focus();win.print();},300);
+
+window.runComparison=function(){
+  var a=document.getElementById('cmpA').value.trim();
+  var b=document.getElementById('cmpB').value.trim();
+  var out=document.getElementById('cmpResult');
+  if(!a||!b){out.innerHTML='<div style="color:var(--err);padding:12px">Inserisci entrambe le molecole</div>';return;}
+  out.innerHTML='<div style="color:var(--g700);padding:14px;text-align:center">⏳ Recupero proprietà da PubChem...</div>';
+  var PUB='https://pubchem.ncbi.nlm.nih.gov/rest/pug';
+  var props='MolecularFormula,MolecularWeight,IUPACName,XLogP,TPSA,HBondDonorCount,HBondAcceptorCount,RotatableBondCount';
+  function getMol(n){
+    return fetch(PUB+'/compound/name/'+encodeURIComponent(n)+'/cids/JSON')
+      .then(function(r){return r.json();}).then(function(j){return j.IdentifierList.CID[0];})
+      .then(function(cid){
+        return fetch(PUB+'/compound/cid/'+cid+'/property/'+props+'/JSON')
+          .then(function(r){return r.json();}).then(function(j){var p=j.PropertyTable.Properties[0];p.CID=cid;return p;});
+      });
+  }
+  Promise.all([getMol(a),getMol(b)]).then(function(res){
+    var A=res[0],B=res[1];
+    function row(label,va,vb,unit){
+      var diff=parseFloat(vb)-parseFloat(va);
+      var color=isNaN(diff)?'#666':diff>0?'#1B5E20':diff<0?'#c62828':'#666';
+      return '<tr><td style="padding:8px 12px;color:var(--text2);font-weight:600">'+label+'</td>'
+        +'<td style="padding:8px 12px;text-align:center;font-weight:700">'+va+(unit||'')+'</td>'
+        +'<td style="padding:8px 12px;text-align:center;font-weight:700">'+vb+(unit||'')+'</td>'
+        +'<td style="padding:8px 12px;text-align:center;color:'+color+';font-size:.85rem">'+(isNaN(diff)?'':((diff>0?'+':'')+diff.toFixed(2)))+'</td></tr>';
+    }
+    out.innerHTML='<div style="background:var(--white);border:1px solid var(--g200);border-radius:12px;overflow:hidden">'
+      +'<table style="width:100%;border-collapse:collapse">'
+      +'<thead><tr style="background:var(--g900);color:#fff"><th style="padding:10px;text-align:left">Proprietà</th>'
+      +'<th style="padding:10px">'+a+'</th><th style="padding:10px">'+b+'</th><th style="padding:10px">Δ</th></tr></thead>'
+      +'<tbody>'
+      +row('Formula',A.MolecularFormula,B.MolecularFormula,'')
+      +row('MW',Math.round(A.MolecularWeight),Math.round(B.MolecularWeight),' g/mol')
+      +row('LogP',A.XLogP||'N/D',B.XLogP||'N/D','')
+      +row('TPSA',A.TPSA||'N/D',B.TPSA||'N/D',' Å²')
+      +row('HBD',A.HBondDonorCount,B.HBondDonorCount,'')
+      +row('HBA',A.HBondAcceptorCount,B.HBondAcceptorCount,'')
+      +row('RotB',A.RotatableBondCount,B.RotatableBondCount,'')
+      +'</tbody></table></div>';
+  }).catch(function(e){
+    out.innerHTML='<div style="color:var(--err);padding:14px;background:#ffebee;border-radius:8px">❌ Errore: '+e.message+'</div>';
+  });
 };
 </script>
 <script>
@@ -26987,6 +27006,43 @@ window.initAnalitica = function(){
   }catch(e){}
 })();
 
+</script>
+<script>
+// Fallback per sezioni vuote
+(function(){
+  var origObserver = null;
+  function checkEmptySection(){
+    setTimeout(function(){
+      var active = document.querySelector('.section.on');
+      if(!active) return;
+      var content = active.innerHTML.trim();
+      if(content.length < 50 || active.children.length === 0){
+        var secId = active.id;
+        active.innerHTML = '<div class="section-title">' + secId.toUpperCase() + '</div>'
+          + '<div style="background:var(--g50);border-radius:12px;padding:24px;text-align:center;color:var(--text2)">'
+          + '<div style="font-size:3rem;margin-bottom:12px">🚧</div>'
+          + '<div style="font-weight:700;color:var(--g900);margin-bottom:8px">Sezione in costruzione</div>'
+          + '<div style="font-size:.85rem;margin-bottom:14px">Questa sezione (' + secId + ') sarà disponibile in una prossima versione.</div>'
+          + '<button onclick="document.querySelector(\'[data-s=&quot;smol&quot;]\').click()" style="background:var(--g900);color:#fff;border:none;border-radius:10px;padding:10px 20px;cursor:pointer;font-weight:700">🏠 Torna a Home</button>'
+          + '</div>';
+      }
+    }, 800);
+  }
+  document.addEventListener('click', function(e){
+    if(e.target.matches('.nav-btn') || e.target.matches('[data-s]')){
+      checkEmptySection();
+    }
+  });
+})();
+</script>
+<script>
+window.downloadMaterial=function(type){
+  var sections={spettri:'sspec',farmaci:'sfarm',formule:'sform',aa:'saa',sintesi:'ssyn'};
+  var sec=sections[type];
+  if(!sec){if(typeof downloadBioSpecInfo==='function')downloadBioSpecInfo();return;}
+  var btn=document.querySelector('[data-s="'+sec+'"]');
+  if(btn){btn.click();setTimeout(function(){window.print();},800);}
+};
 </script>
 </body>
 </html>
