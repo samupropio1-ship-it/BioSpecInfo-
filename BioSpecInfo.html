@@ -775,6 +775,8 @@ input::placeholder, textarea::placeholder { color: #888888; }
     <button class="nav-btn" data-s="sdashboard">🏠 Dashboard</button>
     <button class="nav-btn" data-s="smateriali">📁 Materiali</button>
     <button class="nav-btn" data-s="snotes">📝 Note</button>
+    <button class="nav-btn" data-s="sfilemanager">📁 File Manager</button>
+    <button class="nav-btn" data-s="sanalitica">📚 Analitica II</button>
     <button class="nav-btn" data-s="sstats">📊 Statistiche</button>
     <button class="nav-btn" data-s="spomo">🍅 Pomodoro</button>
   </div>
@@ -17916,6 +17918,8 @@ function setupNavBtn(btn){
       "spubchem": "initPubChem",
       "sdashboard": "initDashboard",
       "snotes": "initNotes",
+      "sfilemanager": "initFileManager",
+      "sanalitica": "initAnalitica",
       "sstats": "initStats",
       "stheory": "initTheory",
       "srisorse": "initResources",
@@ -24973,7 +24977,10 @@ window.calcMolProps = function() {
 <div id="spubchem" class="section"><
 <div id="sdashboard" class="section">
   <div id="sdash-inner"></div>
-</div>/div>
+<
+<div id="sanalitica" class="section"></div>
+<div id="sfilemanager" class="section"></div>
+/div>/div>
 </div>
 
 
@@ -26317,24 +26324,38 @@ window.initPubChem = function(){
 window.initDashboard = function(){
   var sec=document.getElementById('sdashboard');
   if(!sec||sec._built)return; sec._built=true;
-  var farmCount=typeof DRUGS!=='undefined'?DRUGS.length:143;
-  var rxnCount=typeof RXN!=='undefined'?RXN.length:289;
-  function navTo(id){var b=document.querySelector('[data-s="'+id+'"]');if(b)b.click();}
-  sec.innerHTML='<div class="section-title">Dashboard - BioSpecInfo</div>'
-    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:16px">'
-    +[['Farmaci',farmCount,'sfarm'],['Sintesi',rxnCount,'ssyn'],['Elementi','118','spt'],
-      ['Formule','299','sform'],['Amminoacidi','67','saa'],['Sezioni','56','smol']
-    ].map(function(d){
-      return '<div class="panel" style="text-align:center;cursor:pointer" onclick="(function(){var b=document.querySelector(\'[data-s=&quot;'+d[2]+'&quot;]\');if(b)b.click();})() ">'
-        +'<div style="font-size:1.8rem;font-weight:900;color:var(--g900)">'+d[1]+'</div>'
-        +'<div style="font-size:.85rem;color:var(--text2)">'+d[0]+'</div></div>';
+  function nb(id){var b=document.querySelector('[data-s="'+id+'"]');if(b)b.click();}
+  var cards=[
+    {n:'Farmaci',v:143,icon:'💊',s:'sfarm'},
+    {n:'Sintesi',v:289,icon:'🧪',s:'ssyn'},
+    {n:'Elementi',v:118,icon:'⬡',s:'spt'},
+    {n:'Formule',v:299,icon:'📐',s:'sform'},
+    {n:'Amminoacidi',v:67,icon:'🧬',s:'saa'},
+    {n:'Biomolecole',v:1050,icon:'🔬',s:'sbio'},
+  ];
+  sec.innerHTML='<div class="section-title">🏠 DASHBOARD — BioSpecInfo v10.4</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:16px">'
+    +cards.map(function(c){
+      return '<div class="panel" style="text-align:center;cursor:pointer;padding:12px" onclick="(function(){var b=document.querySelector(&quot;[data-s=\'&quot;+c.s+&quot;\']&quot;);if(b)b.click();})()">'
+        +'<div style="font-size:1.6rem">'+c.icon+'</div>'
+        +'<div style="font-size:1.4rem;font-weight:900;color:var(--g900)">'+c.v+'</div>'
+        +'<div style="font-size:.78rem;color:var(--text2)">'+c.n+'</div></div>';
     }).join('')+'</div>'
-    +'<div class="panel"><div class="ph">Navigazione Rapida</div><div class="pb" style="display:flex;flex-wrap:wrap;gap:6px">'
-    +[['Molecola','smol'],['Farmaci','sfarm'],['Sintesi','ssyn'],['Tavola Periodica','spt'],
-      ['Strutture 3D','sstruct'],['Quiz','squiz'],['Note','snotes'],['Materiali','smateriali']
+    +'<div class="panel" style="margin-bottom:10px"><div class="ph">🔗 Navigazione Rapida</div>'
+    +'<div class="pb" style="display:flex;flex-wrap:wrap;gap:6px">'
+    +[['🔬 Molecola','smol'],['💊 Farmaci','sfarm'],['🧪 Sintesi','ssyn'],['⬡ Tavola Periodica','spt'],
+      ['🧬 Strutture 3D','sstruct'],['📊 Spettri','sspec'],['❓ Quiz','squiz'],
+      ['📝 Note','snotes'],['📁 File Manager','sfilemanager'],['📚 Analitica II','sanalitica']
     ].map(function(s){
-      return '<button onclick="(function(){var b=document.querySelector(\'[data-s=&quot;'+s[1]+'&quot;]\');if(b)b.click();})()" style="background:var(--g100);border:1px solid var(--g200);border-radius:8px;padding:5px 12px;cursor:pointer;font-size:.82rem;color:var(--g900)">'+s[0]+'</button>';
-    }).join('')+'</div></div>';
+      var el=document.createElement('button');
+      el.style.cssText='background:var(--g100);border:1px solid var(--g200);border-radius:8px;padding:5px 12px;cursor:pointer;font-size:.82rem;color:var(--g900);font-weight:600';
+      el.textContent=s[0];
+      el.onclick=(function(sid){return function(){var b=document.querySelector('[data-s="'+sid+'"]');if(b)b.click();};})(s[1]);
+      return el.outerHTML;
+    }).join('')+'</div></div>'
+    +'<div class="panel"><div class="ph">⬇️ Scarica Sito</div><div class="pb">'
+    +'<button onclick="downloadBioSpecInfo()" style="background:var(--g900);color:#fff;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:700">⬇️ Scarica BioSpecInfo.html</button>'
+    +'</div></div>';
 };
 
 window.initMateriali = function(){
@@ -26354,6 +26375,263 @@ window.initMateriali = function(){
     +'<button onclick="window.print()" style="background:var(--g900);color:#fff;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:700">Stampa / PDF</button>'
     +'<button onclick="if(typeof downloadBioSpecInfo===\'function\')downloadBioSpecInfo()" style="background:var(--g100);color:var(--g900);border:1px solid var(--g200);border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:700">Scarica Sito</button>'
     +'</div></div>';
+};
+
+</script>
+<script>
+// Sezione Chimica Analitica II — Appunti Di Nunno
+window.initAnalitica = function(){
+  var sec = document.getElementById('sanalitica');
+  if(!sec || sec._built) return;
+  sec._built = true;
+
+  var chapters = [
+    {id:'crom', icon:'📊', title:'1. Parametri Cromatografici', content:[
+      {h:'Piatto Teorico (N, H)', t:'Un piatto teorico è una porzione di colonna in cui l\'analita è mediamente in equilibrio tra fase mobile e fase stazionaria. H = σ²/L (altezza di piatto). N = L/H = 16·(tR/W)² numero di piatti teorici. Maggiore N → migliore efficienza di separazione.'},
+      {h:'Equazione di Van Deemter', t:'H = A + B/u + C·u — A: allargamento per percorsi multipli (eddy diffusion); B/u: diffusione longitudinale (diminuisce ad alta velocità); C·u: trasferimento di massa (aumenta ad alta velocità). Velocità ottimale uopt = √(B/C). Minimo di H = A + 2√(BC).'},
+      {h:'Fattore di Capacità k\'', t:'k\' = (tR - tM)/tM — rapporto tra il tempo che l\'analita trascorre in fase stazionaria vs fase mobile. k\' ottimale: 1-10. Se k\'<1: scarsa ritenzione. Se k\'>10: analisi troppo lenta. k\' = KV_s/V_m (K = costante distribuzione).'},
+      {h:'Fattore di Selettività α', t:'α = k\'₂/k\'₁ = K₂/K₁ ≥ 1. Misura la separazione relativa tra due componenti. Se α=1: impossibile separare. Dipende dalla natura delle fasi e dalla temperatura.'},
+      {h:'Risoluzione R', t:'R = 2(tR₂-tR₁)/(W₁+W₂). R>1.5 = separazione completa (baseline). R=1.0 = ~98% separazione. Equazione fondamentale: R = (√N/4)·((α-1)/α)·(k\'/(1+k\')). Per migliorare R: aumentare N (colonna più lunga), aumentare α (cambiare fase), ottimizzare k\'.'},
+    ]},
+    {id:'gc', icon:'🔬', title:'2. Gas Cromatografia (GC)', content:[
+      {h:'Principio e Fasi', t:'GC separa miscele volatili usando N₂, He o H₂ come fase mobile. Due meccanismi: GLC (gas-liquido, ripartizione) e GSC (gas-solido, adsorbimento). Volumi di ritenzione: VR = F·tR, VM = F·tM. Flusso effettivo: F = FM·(TC/T)·(P-PH₂O)/P.'},
+      {h:'Equazione di Clausius-Clapeyron', t:'log(Vg) = -ΔHv/(2.303·R)·(1/T) + cost. La dipendenza lineare di log(Vg) vs 1/T permette di calcolare l\'entalpia di vaporizzazione. Temperatura programmata: migliora separazione di miscele con componenti a diversa volatilità.'},
+      {h:'Rivelatori GC', t:'FID (Fiamma): universale per organici, non rileva acqua/CO₂. TCD (Thermal Conductivity): universale ma meno sensibile. ECD (Cattura Elettroni): specifico per alogeni/nitro, molto sensibile (ppb). FPD: specifico S e P. NPD: N e P.'},
+      {h:'Colonne Capillari vs Impaccate', t:'Capillari WCOT/SCOT: diametro 0.1-0.5mm, lunghezza 15-100m, N=10⁵-10⁶. Impaccate: diametro 2-4mm, lunghezza max 3m, N=10³-10⁴. Capillari danno risoluzione molto superiore. Fase stazionaria: polidimetilsilossano (apolara), polietilenglicolici (polare).'},
+    ]},
+    {id:'hplc', icon:'💧', title:'3. HPLC (Cromatografia Liquida ad Alta Prestazione)', content:[
+      {h:'Principio HPLC', t:'Fase mobile liquida pompata ad alta pressione (5-400 bar). Meccanismi: fase inversa (C18, C8, apolari), fase normale (silice, polari), scambio ionico, esclusione dimensionale (GPC/SEC). Rivelatori: UV/Vis (210-400 nm), DAD, RI, fluorescenza, MS.'},
+      {h:'Fase Inversa (RP-HPLC)', t:'Sistema più usato (70% delle analisi HPLC). Fase stazionaria apolare (C18, C8), fase mobile polare (H₂O/ACN o H₂O/MeOH). Eluizione isocratica o gradiente. Forza eluotropica aumenta con % solvente organico. Separazione: apolari → più ritenuti.'},
+      {h:'Pompe e Sistema HPLC', t:'Pompe reciprocanti a pistone: flusso costante 0.1-10 mL/min. Colonne: acciaio inox, 15-25cm x 4.6mm, impaccate con silice C18 3-5μm. UHPLC (<2μm, 1000 bar): più veloce ed efficiente. Degassatore: rimuove O₂ disciolto.'},
+      {h:'Rivelatore UV e DAD', t:'UV a lunghezza fissa (254nm): semplice. DAD (Diode Array): spettro completo in tempo reale, utile per identificazione. Cella a flusso di tipo Z per HPLC capillare. Sensibilità: 10⁻⁸-10⁻¹⁰ g/mL.'},
+    ]},
+    {id:'spatt', icon:'⚡', title:'4. Spettroscopia Atomica', content:[
+      {h:'Spettroscopia di Emissione Atomica (AES)', t:'L\'analita viene atomizzato ed eccitato: A → A* → A + hν. Temperatura di eccitazione: fiamma (2000-3000K), plasma ICP (6000-10000K), arco elettrico (4000-7000K). ICP-AES: plasma di Ar a RF, multi-elemento, limiti di rilevazione ppb.'},
+      {h:'AAS - Assorbimento Atomico', t:'Legge di Lambert-Beer: A = ε·b·c. Sorgente: lampada a catodo cavo elemento-specifica. Atomizzatori: fiamma (acetilene/aria: 2300K) o fornetto di grafite (ETA-AAS, 2000-2700K, ppb→ppt). Correzione background: deuterio o Zeeman.'},
+      {h:'ICP-MS', t:'Plasma ICP accoppiato a spettrometro di massa: sensibilità sub-ppt, multi-elemento simultaneo, analisi isotopica. Interferenze: sovrapposizioni di massa (⁴⁰Ar¹⁶O⁺ vs ⁵⁶Fe⁺), ridotte con cellula di collisione/reazione (DRC). Standard interno: ¹⁰³Rh, ¹⁸⁵Re.'},
+    ]},
+    {id:'pot', icon:'🔋', title:'5. Potenziometria e Voltammetria', content:[
+      {h:'Cella Elettrochimica e Potenziale', t:'Equazione di Nernst: E = E° - (RT/nF)·ln(Q). A 25°C: E = E° - (0.05916/n)·log(Q). Cella: indicatore vs riferimento (SCE: +0.241V vs NHE; Ag/AgCl: +0.197V). EMF = E_ind - E_rif. Potenziale di giunzione: minimize con KCl sat.'},
+      {h:'Elettrodi Iono-Selettivi (ISE)', t:'ISE misura attività ionica selettiva. Vetro pH: membrana silicato (Na₂O·CaO·SiO₂), selettivo H⁺. Fluoruro: cristallo LaF₃, range 10⁻¹-10⁻⁶ M. Nitrato: scambiatore ionico liquido. Curva di calibrazione: E vs log(a), pendenza ±59.16/z mV/decade. TISAB: tampone ionico.'},
+      {h:'Voltammetria e Polarografia', t:'Tecnica amperometrica: misura corrente vs potenziale applicato. Corrente di diffusione: id = nFADC/δ (Fick). Polarografia classica (goccia di Hg): limitata da corrente capacitiva. ASV (Anodic Stripping): preconcentrazione + spazzamento, ppb metalli pesanti. Voltammetria ciclica: caratterizzazione redox, ip = 0.4463·nFAC√(nFDv/RT).'},
+    ]},
+  ];
+
+  var tabs = sec.innerHTML = '<div class="section-title">📚 CHIMICA ANALITICA II — Appunti Di Nunno (263 pagine)</div>'
+    + '<div style="background:var(--g50);border:1px solid var(--g200);border-radius:12px;padding:8px;margin-bottom:14px;font-size:.82rem;color:var(--text2)">📖 Contenuto estratto dagli appunti. Per il testo completo usa la sezione <b>📁 File Manager</b> per caricare il PDF originale.</div>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">'
+    + chapters.map(function(c,i){
+        return '<button onclick="showAnaliticaChapter(\''+c.id+'\')" id="btn-an-'+c.id+'" style="background:var(--g'+(i===0?'900':'100')+');color:var(--(i===0?\'white\':\'g900\'));border:1px solid var(--g200);border-radius:20px;padding:6px 14px;cursor:pointer;font-size:.82rem;font-weight:700">'+c.icon+' '+c.title.split('. ')[1]+'</button>';
+      }).join('')
+    + '</div>'
+    + '<div id="analitica-content"></div>';
+
+  sec.innerHTML = '<div class="section-title">📚 CHIMICA ANALITICA II — Appunti Di Nunno</div>'
+    + '<div style="background:var(--g50);border:1px solid var(--g200);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:.82rem;color:var(--text2)">Contenuto estratto dagli appunti. Per il PDF completo: sezione <b>📁 File Manager</b>.</div>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px" id="an-tabs">'
+    + chapters.map(function(c){
+        return '<button onclick="showAnCh(\''+c.id+'\')" id="btn-an-'+c.id+'" class="nav-btn">'+c.icon+' '+c.title+'</button>';
+      }).join('')
+    + '</div>'
+    + '<div id="analitica-content" style="min-height:200px"></div>';
+
+  window._anChapters = chapters;
+  window.showAnCh = function(id){
+    var ch = chapters.find(function(c){return c.id===id;});
+    if(!ch) return;
+    // Update tab style
+    chapters.forEach(function(c){
+      var b=document.getElementById('btn-an-'+c.id);
+      if(b) b.style.background = c.id===id ? 'var(--g900)' : '';
+      if(b) b.style.color = c.id===id ? '#fff' : '';
+    });
+    var out = document.getElementById('analitica-content');
+    out.innerHTML = '<div style="display:grid;gap:10px">'
+      + ch.content.map(function(item){
+          return '<div class="panel"><div class="ph">'+item.h+'</div>'
+            +'<div class="pb" style="font-size:.88rem;line-height:1.7;color:var(--text)">'+item.t+'</div></div>';
+        }).join('')
+      + '</div>';
+  };
+  window.showAnCh(chapters[0].id);
+};
+
+// FILE MANAGER — IndexedDB storage per PDF e appunti
+// (c) 2025 Samuele Pio Provenzano
+
+window.BSI_DB = null;
+
+function openDB(){
+  return new Promise(function(res, rej){
+    if(window.BSI_DB){ res(window.BSI_DB); return; }
+    var req = indexedDB.open('BioSpecInfoFiles', 1);
+    req.onupgradeneeded = function(e){
+      var db = e.target.result;
+      if(!db.objectStoreNames.contains('files')){
+        var store = db.createObjectStore('files', {keyPath:'id'});
+        store.createIndex('name', 'name', {unique:false});
+        store.createIndex('cat', 'cat', {unique:false});
+      }
+    };
+    req.onsuccess = function(e){ window.BSI_DB = e.target.result; res(window.BSI_DB); };
+    req.onerror = function(e){ rej(e); };
+  });
+}
+
+function saveFile(name, cat, arrayBuffer, mime){
+  return openDB().then(function(db){
+    return new Promise(function(res, rej){
+      var tx = db.transaction('files', 'readwrite');
+      var id = Date.now() + '_' + Math.random().toString(36).slice(2);
+      tx.objectStore('files').put({id:id, name:name, cat:cat||'Altro',
+        mime:mime||'application/octet-stream', data:arrayBuffer,
+        size:arrayBuffer.byteLength, date:new Date().toISOString()});
+      tx.oncomplete = function(){ res(id); };
+      tx.onerror = function(e){ rej(e); };
+    });
+  });
+}
+
+function getAllFiles(){
+  return openDB().then(function(db){
+    return new Promise(function(res, rej){
+      var tx = db.transaction('files','readonly');
+      var req = tx.objectStore('files').getAll();
+      req.onsuccess = function(){ res(req.result||[]); };
+      req.onerror = function(e){ rej(e); };
+    });
+  });
+}
+
+function deleteFile(id){
+  return openDB().then(function(db){
+    return new Promise(function(res,rej){
+      var tx = db.transaction('files','readwrite');
+      tx.objectStore('files').delete(id);
+      tx.oncomplete = function(){ res(); };
+      tx.onerror = rej;
+    });
+  });
+}
+
+function downloadFileById(id, name, mime){
+  openDB().then(function(db){
+    return new Promise(function(res,rej){
+      var tx = db.transaction('files','readonly');
+      var req = tx.objectStore('files').get(id);
+      req.onsuccess = function(){ res(req.result); };
+      req.onerror = rej;
+    });
+  }).then(function(rec){
+    if(!rec) return;
+    var blob = new Blob([rec.data], {type: rec.mime||mime||'application/octet-stream'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = rec.name||name||'file';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 1000);
+  });
+}
+
+window.initFileManager = function(){
+  var sec = document.getElementById('sfilemanager');
+  if(!sec || sec._built) return;
+  sec._built = true;
+
+  var cats = ['Appunti','Libri di Testo','Esercizi','Altro'];
+
+  sec.innerHTML = '<div class="section-title">📁 FILE MANAGER — Appunti e Materiali</div>'
+    + '<div style="background:var(--g50);border-radius:12px;padding:14px;margin-bottom:14px">'
+    + '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
+    + '<label style="flex:1;min-width:200px;background:var(--g900);color:#fff;border-radius:10px;padding:12px 18px;cursor:pointer;text-align:center;font-weight:700">'
+    + '📤 Carica File (PDF, immagini, testi)'
+    + '<input type="file" id="fm-input" multiple accept=".pdf,.png,.jpg,.jpeg,.txt,.docx" style="display:none" onchange="handleFileUpload(event)">'
+    + '</label>'
+    + '<select id="fm-cat" style="padding:10px;border:1px solid var(--g200);border-radius:8px;background:var(--white);color:var(--text)">'
+    + cats.map(function(c){ return '<option>'+c+'</option>'; }).join('')
+    + '</select>'
+    + '</div>'
+    + '<div id="fm-progress" style="margin-top:8px;font-size:.82rem;color:var(--g700)"></div>'
+    + '</div>'
+    + '<div id="fm-list"><div style="color:var(--text2);text-align:center;padding:24px">⏳ Caricamento...</div></div>';
+
+  window.handleFileUpload = function(e){
+    var files = Array.from(e.target.files);
+    var cat = document.getElementById('fm-cat').value;
+    var prog = document.getElementById('fm-progress');
+    var done = 0;
+    prog.textContent = '⏳ Caricamento '+files.length+' file...';
+    files.forEach(function(file){
+      var reader = new FileReader();
+      reader.onload = function(ev){
+        saveFile(file.name, cat, ev.target.result, file.type).then(function(){
+          done++;
+          prog.textContent = done===files.length ? '✅ '+done+' file salvati!' : '⏳ '+done+'/'+files.length+'...';
+          if(done===files.length){ setTimeout(function(){ prog.textContent=''; renderFileList(); }, 2000); }
+        });
+      };
+      reader.readAsArrayBuffer(file);
+    });
+    e.target.value = '';
+  };
+
+  function renderFileList(){
+    var list = document.getElementById('fm-list');
+    getAllFiles().then(function(files){
+      if(!files.length){
+        list.innerHTML = '<div style="color:var(--text2);text-align:center;padding:30px;background:var(--g50);border-radius:12px">'
+          + '<div style="font-size:2rem;margin-bottom:8px">📂</div>'
+          + '<div>Nessun file caricato ancora.</div>'
+          + '<div style="font-size:.82rem;margin-top:6px">Usa il pulsante "Carica File" per aggiungere i tuoi appunti.</div>'
+          + '</div>';
+        return;
+      }
+      // Group by category
+      var byCat = {};
+      files.forEach(function(f){ (byCat[f.cat]=byCat[f.cat]||[]).push(f); });
+      list.innerHTML = '<div style="font-weight:700;color:var(--g900);margin-bottom:10px">'+files.length+' file salvati nel browser</div>'
+        + Object.keys(byCat).map(function(cat){
+            return '<div style="margin-bottom:14px"><div style="font-weight:700;color:var(--g700);font-size:.85rem;text-transform:uppercase;margin-bottom:6px">📂 '+cat+'</div>'
+              + '<div style="display:grid;gap:6px">'
+              + byCat[cat].map(function(f){
+                  var ext = f.name.split('.').pop().toLowerCase();
+                  var icon = ext==='pdf'?'📄':ext==='png'||ext==='jpg'?'🖼️':ext==='docx'?'📝':'📎';
+                  var size = f.size>1024*1024 ? Math.round(f.size/1024/1024*10)/10+'MB' : Math.round(f.size/1024)+'KB';
+                  return '<div style="background:var(--white);border:1px solid var(--g200);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px">'
+                    + '<span style="font-size:1.4rem">'+icon+'</span>'
+                    + '<div style="flex:1;min-width:0"><div style="font-weight:700;color:var(--g900);font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+f.name+'</div>'
+                    + '<div style="font-size:.75rem;color:var(--text2)">'+size+' · '+new Date(f.date).toLocaleDateString('it-IT')+'</div></div>'
+                    + '<div style="display:flex;gap:6px;flex-shrink:0">'
+                    + (ext==='pdf'?'<button onclick="previewFile(\''+f.id+'\',\''+f.mime+'\')" style="background:var(--g100);border:1px solid var(--g200);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.78rem">👁️ Apri</button>':'')
+                    + '<button onclick="downloadFileById(\''+f.id+'\',\''+f.name+'\',\''+f.mime+'\')" style="background:var(--g900);color:#fff;border:none;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.78rem">⬇️</button>'
+                    + '<button onclick="delFile(\''+f.id+'\')" style="background:#ffebee;color:#c62828;border:none;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.78rem">🗑️</button>'
+                    + '</div></div>';
+                }).join('')
+              + '</div></div>';
+          }).join('');
+    }).catch(function(){ list.innerHTML='<div style="color:var(--err)">Errore accesso IndexedDB</div>'; });
+  }
+
+  window.delFile = function(id){
+    if(!confirm('Eliminare questo file?')) return;
+    deleteFile(id).then(renderFileList);
+  };
+
+  window.previewFile = function(id, mime){
+    openDB().then(function(db){
+      return new Promise(function(res,rej){
+        db.transaction('files','readonly').objectStore('files').get(id).onsuccess=function(e){res(e.target.result);};
+      });
+    }).then(function(rec){
+      if(!rec) return;
+      var blob = new Blob([rec.data], {type: rec.mime||'application/pdf'});
+      var url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
+    });
+  };
+
+  renderFileList();
 };
 
 </script>
