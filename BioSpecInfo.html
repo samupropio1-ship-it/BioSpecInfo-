@@ -13,6 +13,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="BioSpecInfo">
   
+<link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#1B5E20">
 <link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png">
 <link rel="apple-touch-icon" sizes="512x512" href="./icon-512.png">
@@ -1328,18 +1329,18 @@ window.onload = function(){
       if(sec==='smm' && typeof initMM==='function') initMM();
       if(sec==='snernst' && typeof initNernst==='function') initNernst();
       if(sec==='smoldraw' && typeof initMolEditor==='function') initMolEditor();
-      if(sec==='smateriali' && typeof initMateriali==='function') initMateriali();
+      if(sec==='smateriali' && typeof window.initMateriali==='function') window.initMateriali();
       if(sec==='serrori' && typeof initRiassunti==='function') initRiassunti();
-      if(sec==='ssteich' && typeof initStechio==='function') initStechio();
-      if(sec==='spubchem' && typeof initPubChem==='function') initPubChem();
-      if(sec==='sdashboard' && typeof initDashboard==='function') initDashboard();
-      if(sec==='sanalitica' && typeof initAnalitica==='function') initAnalitica();
-      if(sec==='sfilemanager' && typeof initFileManager==='function') initFileManager();
+      if(sec==='ssteich' && typeof window.initStechio==='function') window.initStechio();
+      if(sec==='spubchem' && typeof window.initPubChem==='function') window.initPubChem();
+      if(sec==='sdashboard' && typeof window.initDashboard==='function') window.initDashboard();
+      if(sec==='sanalitica' && typeof window.initAnalitica==='function') window.initAnalitica();
+      if(sec==='sfilemanager' && typeof window.initFileManager==='function') window.initFileManager();
       if(sec==='scompare' && typeof window.initConfrontaMol==='function') window.initConfrontaMol();
       if(sec==='senergia' && typeof initEnergyDiagrams==='function') initEnergyDiagrams();
       if(sec==='sstats' && typeof initStats==='function') initStats();
-      if(sec==='sanalitica' && typeof initAnalitica==='function') initAnalitica();
-      if(sec==='sfilemanager' && typeof initFileManager==='function') initFileManager();
+      if(sec==='sanalitica' && typeof window.initAnalitica==='function') window.initAnalitica();
+      if(sec==='sfilemanager' && typeof window.initFileManager==='function') window.initFileManager();
       if(sec==='scompare' && typeof window.initConfrontaMol==='function') window.initConfrontaMol();
       if(sec==='senergia' && typeof initEnergyDiagrams==='function') initEnergyDiagrams();
       if(sec==='sstats' && typeof initStats==='function') initStats();
@@ -1363,13 +1364,13 @@ window.onload = function(){
       if(sec==='sstats' && typeof initStats==='function') initStats();
       if(sec==='smolprop' && typeof initMolProps==='function') initMolProps();
       if(sec==='scompare' && typeof initConfrontaMol==='function') initConfrontaMol();
-      if(sec==='sfilemanager' && typeof initFileManager==='function') initFileManager();
-      if(sec==='sanalitica' && typeof initAnalitica==='function') initAnalitica();
-      if(sec==='sdashboard' && typeof initDashboard==='function') initDashboard();
-      if(sec==='smateriali' && typeof initMateriali==='function') initMateriali();
-      if(sec==='serrori' && typeof initErroriComuni==='function') initErroriComuni();
-      if(sec==='ssteich' && typeof initStechio==='function') initStechio();
-      if(sec==='spubchem' && typeof initPubChem==='function') initPubChem();
+      if(sec==='sfilemanager' && typeof window.initFileManager==='function') window.initFileManager();
+      if(sec==='sanalitica' && typeof window.initAnalitica==='function') window.initAnalitica();
+      if(sec==='sdashboard' && typeof window.initDashboard==='function') window.initDashboard();
+      if(sec==='smateriali' && typeof window.initMateriali==='function') window.initMateriali();
+      if(sec==='serrori' && typeof window.initErroriComuni==='function') window.initErroriComuni();
+      if(sec==='ssteich' && typeof window.initStechio==='function') window.initStechio();
+      if(sec==='spubchem' && typeof window.initPubChem==='function') window.initPubChem();
       if(typeof initMap!=='undefined'&&initMap[sec]&&typeof window[initMap[sec]]==='function'){window[initMap[sec]]();}
     };
   });
@@ -26309,704 +26310,7 @@ console.log('Protein 3D Canvas viewer loaded ✓');
 
 
 
-<script>
-// ═══════════════════════════════════════════════════════════════
-// BIOSPECINFO v10.4 — INIT FUNCTIONS CLEAN
-// (c) 2025 Samuele Pio Provenzano
-// ═══════════════════════════════════════════════════════════════
 
-// ── Helper: naviga a una sezione ────────────────────────────────
-function bsiNav(secId){
-  var b = document.querySelector('[data-s="'+secId+'"]');
-  if(b) b.click();
-}
-
-// ── DASHBOARD ────────────────────────────────────────────────────
-window.initDashboard = function(){
-  var sec = document.getElementById('sdashboard');
-  if(!sec || sec._built) return;
-  sec._built = true;
-
-  var wrap = document.createElement('div');
-
-  // Title
-  var title = document.createElement('div');
-  title.className = 'section-title';
-  title.textContent = 'Dashboard — BioSpecInfo v10.4';
-  wrap.appendChild(title);
-
-  // Stats cards
-  var grid = document.createElement('div');
-  grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-bottom:16px';
-  var cards = [
-    {n:'Farmaci',v:143,s:'sfarm'},
-    {n:'Sintesi',v:289,s:'ssyn'},
-    {n:'Elementi',v:118,s:'spt'},
-    {n:'Formule',v:299,s:'sform'},
-    {n:'Aminoacidi',v:67,s:'saa'},
-    {n:'Biomolecole',v:1050,s:'sbio'},
-  ];
-  cards.forEach(function(c){
-    var d = document.createElement('div');
-    d.className = 'panel';
-    d.style.cssText = 'text-align:center;cursor:pointer;padding:12px';
-    d.innerHTML = '<div style="font-size:1.5rem;font-weight:900;color:var(--g900)">'+c.v+'</div>'
-      + '<div style="font-size:.78rem;color:var(--text2)">'+c.n+'</div>';
-    d.onclick = (function(id){ return function(){ bsiNav(id); }; })(c.s);
-    grid.appendChild(d);
-  });
-  wrap.appendChild(grid);
-
-  // Quick nav
-  var navPanel = document.createElement('div');
-  navPanel.className = 'panel';
-  navPanel.innerHTML = '<div class="ph">Navigazione Rapida</div>';
-  var navBody = document.createElement('div');
-  navBody.className = 'pb';
-  navBody.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px';
-  var navLinks = [
-    ['Molecola','smol'],['Farmaci','sfarm'],['Sintesi','ssyn'],['Tavola Periodica','spt'],
-    ['Strutture 3D','sstruct'],['Spettri','sspec'],['Quiz','squiz'],
-    ['Note','snotes'],['File Manager','sfilemanager'],['Analitica II','sanalitica']
-  ];
-  navLinks.forEach(function(lk){
-    var btn = document.createElement('button');
-    btn.textContent = lk[0];
-    btn.style.cssText = 'background:var(--g100);border:1px solid var(--g200);border-radius:8px;padding:5px 12px;cursor:pointer;font-size:.82rem;color:var(--g900);font-weight:600';
-    btn.onclick = (function(id){ return function(){ bsiNav(id); }; })(lk[1]);
-    navBody.appendChild(btn);
-  });
-  navPanel.appendChild(navBody);
-  wrap.appendChild(navPanel);
-
-  // Download button
-  var dlPanel = document.createElement('div');
-  dlPanel.className = 'panel';
-  dlPanel.style.marginTop = '10px';
-  dlPanel.innerHTML = '<div class="ph">Scarica Sito</div>';
-  var dlBody = document.createElement('div');
-  dlBody.className = 'pb';
-  var dlBtn = document.createElement('button');
-  dlBtn.textContent = 'Scarica BioSpecInfo.html';
-  dlBtn.style.cssText = 'background:var(--g900);color:#fff;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:700';
-  dlBtn.onclick = function(){ if(typeof downloadBioSpecInfo==='function') downloadBioSpecInfo(); };
-  dlBody.appendChild(dlBtn);
-  dlPanel.appendChild(dlBody);
-  wrap.appendChild(dlPanel);
-
-  sec.innerHTML = '';
-  sec.appendChild(wrap);
-};
-
-// ── MATERIALI ─────────────────────────────────────────────────────
-window.initMateriali = function(){
-  var sec = document.getElementById('smateriali');
-  if(!sec || sec._built) return;
-  sec._built = true;
-
-  var wrap = document.createElement('div');
-  var title = document.createElement('div');
-  title.className = 'section-title';
-  title.textContent = 'Materiali Didattici';
-  wrap.appendChild(title);
-
-  var grid = document.createElement('div');
-  grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-bottom:14px';
-  var items = [
-    ['Tabelle Spettroscopiche','sspec'],
-    ['Schede Farmaci (143)','sfarm'],
-    ['Formulario Fisico-Chimico','sform'],
-    ['Amminoacidi (67)','saa'],
-    ['Sintesi Organica (289)','ssyn'],
-    ['Tavola Periodica','spt'],
-  ];
-  items.forEach(function(item){
-    var d = document.createElement('div');
-    d.className = 'panel';
-    d.style.cursor = 'pointer';
-    var ph = document.createElement('div');
-    ph.className = 'ph';
-    ph.textContent = item[0];
-    var pb = document.createElement('div');
-    pb.className = 'pb';
-    pb.style.fontSize = '.82rem';
-    pb.style.color = 'var(--text2)';
-    pb.textContent = 'Clicca per aprire';
-    d.appendChild(ph);
-    d.appendChild(pb);
-    d.onclick = (function(id){ return function(){ bsiNav(id); }; })(item[1]);
-    grid.appendChild(d);
-  });
-  wrap.appendChild(grid);
-
-  // Esporta panel
-  var expPanel = document.createElement('div');
-  expPanel.className = 'panel';
-  expPanel.innerHTML = '<div class="ph">Esporta / Scarica</div>';
-  var expBody = document.createElement('div');
-  expBody.className = 'pb';
-  expBody.style.cssText = 'display:flex;gap:10px;flex-wrap:wrap;align-items:center';
-
-  var printBtn = document.createElement('button');
-  printBtn.textContent = 'Stampa / Salva PDF';
-  printBtn.style.cssText = 'background:var(--g900);color:#fff;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:700';
-  printBtn.onclick = function(){ window.print(); };
-
-  var dlBtn = document.createElement('button');
-  dlBtn.textContent = 'Scarica Sito HTML';
-  dlBtn.style.cssText = 'background:var(--g100);color:var(--g900);border:1px solid var(--g200);border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:700';
-  dlBtn.onclick = function(){ if(typeof downloadBioSpecInfo==='function') downloadBioSpecInfo(); };
-
-  var fmBtn = document.createElement('button');
-  fmBtn.textContent = 'Vai a File Manager';
-  fmBtn.style.cssText = 'background:var(--g100);color:var(--g900);border:1px solid var(--g200);border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:700';
-  fmBtn.onclick = function(){ bsiNav('sfilemanager'); };
-
-  expBody.appendChild(printBtn);
-  expBody.appendChild(dlBtn);
-  expBody.appendChild(fmBtn);
-  expPanel.appendChild(expBody);
-  wrap.appendChild(expPanel);
-
-  sec.innerHTML = '';
-  sec.appendChild(wrap);
-};
-
-// ── STECHIOMETRIA ─────────────────────────────────────────────────
-window.initStechio = function(){
-  var sec = document.getElementById('ssteich');
-  if(!sec || sec._built) return;
-  sec._built = true;
-
-  sec.innerHTML = '<div class="section-title">Bilanciamento Equazioni — Stechiometria</div>'
-    + '<div style="background:var(--g50);border-radius:12px;padding:14px;margin-bottom:12px">'
-    + '<div style="color:var(--text2);font-size:.85rem;margin-bottom:8px">Inserisci un\'equazione chimica non bilanciata</div>'
-    + '<div class="srow">'
-    + '<input type="text" id="steich-inp" placeholder="H2 + O2 = H2O  ·  CH4 + O2 = CO2 + H2O">'
-    + '<button class="go" id="steich-btn">Bilancia</button>'
-    + '</div></div>'
-    + '<div id="steich-result"></div>';
-
-  document.getElementById('steich-btn').onclick = function(){
-    var q = (document.getElementById('steich-inp').value || '').trim();
-    var out = document.getElementById('steich-result');
-    if(!q) return;
-    out.innerHTML = '<div class="panel">'
-      + '<div class="ph">Equazione inserita</div>'
-      + '<div class="pb"><code style="font-size:1rem">'+q+'</code><br><br>'
-      + '<a href="https://www.wolframalpha.com/input?i=balance+'+encodeURIComponent(q)+'" target="_blank" '
-      + 'style="background:var(--g900);color:#fff;text-decoration:none;padding:8px 16px;border-radius:8px;font-weight:700;display:inline-block;margin-top:8px">'
-      + 'Bilancia su WolframAlpha</a></div></div>';
-  };
-  document.getElementById('steich-inp').onkeydown = function(e){
-    if(e.key==='Enter') document.getElementById('steich-btn').click();
-  };
-};
-
-// ── PUBCHEM SEARCH ─────────────────────────────────────────────────
-window.initPubChem = function(){
-  var sec = document.getElementById('spubchem');
-  if(!sec || sec._built) return;
-  sec._built = true;
-
-  sec.innerHTML = '<div class="section-title">PubChem — Ricerca Avanzata</div>'
-    + '<div style="background:var(--g50);border-radius:12px;padding:14px;margin-bottom:12px">'
-    + '<div class="srow">'
-    + '<input type="text" id="pc-inp" placeholder="es. aspirina · CID 2244 · C9H8O4">'
-    + '<button class="go" id="pc-btn">Cerca</button>'
-    + '</div></div>';
-
-  document.getElementById('pc-btn').onclick = function(){
-    var q = (document.getElementById('pc-inp').value || '').trim();
-    if(!q) return;
-    var qi = document.getElementById('qi');
-    if(qi) qi.value = q;
-    bsiNav('smol');
-    setTimeout(function(){
-      if(typeof go === 'function') go();
-      else {
-        var goBtn = document.getElementById('goBtn');
-        if(goBtn) goBtn.click();
-      }
-    }, 300);
-  };
-  document.getElementById('pc-inp').onkeydown = function(e){
-    if(e.key==='Enter') document.getElementById('pc-btn').click();
-  };
-};
-
-// ── ERRORI COMUNI / RIASSUNTI ─────────────────────────────────────
-window.initErroriComuni = function(){
-  var sec = document.getElementById('serrori');
-  if(!sec || sec._built) return;
-  sec._built = true;
-
-  if(typeof window.initRiassunti === 'function'){
-    window.initRiassunti();
-    return;
-  }
-
-  sec.innerHTML = '<div class="section-title">Riassunti e Mappe Concettuali</div>'
-    + '<div style="background:var(--g50);border-radius:12px;padding:14px">'
-    + '<div class="srow">'
-    + '<input type="text" id="riass-inp" placeholder="es. Ciclo di Krebs · NMR · Stereochimica...">'
-    + '<button class="go" id="riass-btn">Genera Riassunto</button>'
-    + '</div>'
-    + '<div id="riassuntoOutput" style="margin-top:12px;min-height:60px;background:var(--white);border:1px solid var(--g200);border-radius:8px;padding:12px;color:var(--text2)">'
-    + 'Inserisci un argomento e clicca Genera.'
-    + '</div></div>';
-
-  document.getElementById('riass-btn').onclick = function(){
-    var v = (document.getElementById('riass-inp').value || '').trim();
-    if(!v) return;
-    if(typeof window._generateRiassunto === 'function'){
-      window._generateRiassunto(v, 'riassunto');
-    } else {
-      document.getElementById('riassuntoOutput').innerHTML
-        = '<div style="color:var(--text2)">Funzione AI non disponibile in questa versione.</div>';
-    }
-  };
-};
-
-// ── FILE MANAGER (IndexedDB) ──────────────────────────────────────
-(function(){
-  var _db = null;
-
-  function openDB(){
-    return new Promise(function(res,rej){
-      if(_db){ res(_db); return; }
-      var req = indexedDB.open('BioSpecInfoFiles',1);
-      req.onupgradeneeded = function(e){
-        var db = e.target.result;
-        if(!db.objectStoreNames.contains('files'))
-          db.createObjectStore('files',{keyPath:'id'});
-      };
-      req.onsuccess = function(e){ _db=e.target.result; res(_db); };
-      req.onerror = function(){ rej(new Error('DB error')); };
-    });
-  }
-
-  function saveFile(name,cat,buf,mime){
-    return openDB().then(function(db){
-      return new Promise(function(res,rej){
-        var id = Date.now()+'_'+Math.random().toString(36).slice(2);
-        var tx = db.transaction('files','readwrite');
-        tx.objectStore('files').put({id:id,name:name,cat:cat||'Altro',mime:mime||'',
-          data:buf,size:buf.byteLength,date:new Date().toISOString()});
-        tx.oncomplete=function(){res(id);}; tx.onerror=rej;
-      });
-    });
-  }
-
-  function getAllFiles(){
-    return openDB().then(function(db){
-      return new Promise(function(res,rej){
-        var req=db.transaction('files','readonly').objectStore('files').getAll();
-        req.onsuccess=function(){res(req.result||[]);}; req.onerror=rej;
-      });
-    });
-  }
-
-  function deleteFileDB(id){
-    return openDB().then(function(db){
-      return new Promise(function(res,rej){
-        var tx=db.transaction('files','readwrite');
-        tx.objectStore('files').delete(id);
-        tx.oncomplete=res; tx.onerror=rej;
-      });
-    });
-  }
-
-  window.downloadStoredFile = function(id){
-    openDB().then(function(db){
-      return new Promise(function(res,rej){
-        var req=db.transaction('files','readonly').objectStore('files').get(id);
-        req.onsuccess=function(){res(req.result);}; req.onerror=rej;
-      });
-    }).then(function(rec){
-      if(!rec) return;
-      var blob=new Blob([rec.data],{type:rec.mime||'application/octet-stream'});
-      var url=URL.createObjectURL(blob);
-      var a=document.createElement('a');
-      a.href=url; a.download=rec.name;
-      document.body.appendChild(a); a.click();
-      setTimeout(function(){URL.revokeObjectURL(url);a.remove();},1000);
-    });
-  };
-
-  window.openStoredFile = function(id){
-    openDB().then(function(db){
-      return new Promise(function(res,rej){
-        var req=db.transaction('files','readonly').objectStore('files').get(id);
-        req.onsuccess=function(){res(req.result);}; req.onerror=rej;
-      });
-    }).then(function(rec){
-      if(!rec) return;
-      var blob=new Blob([rec.data],{type:rec.mime||'application/pdf'});
-      window.open(URL.createObjectURL(blob),'_blank');
-    });
-  };
-
-  window.initFileManager = function(){
-    var sec = document.getElementById('sfilemanager');
-    if(!sec||sec._built) return;
-    sec._built = true;
-
-    var title = document.createElement('div');
-    title.className = 'section-title';
-    title.textContent = 'File Manager — Appunti e Materiali';
-    sec.appendChild(title);
-
-    // Upload area
-    var uploadDiv = document.createElement('div');
-    uploadDiv.style.cssText = 'background:var(--g50);border-radius:12px;padding:14px;margin-bottom:14px';
-
-    var label = document.createElement('label');
-    label.style.cssText = 'display:block;background:var(--g900);color:#fff;border-radius:10px;padding:12px 18px;cursor:pointer;text-align:center;font-weight:700;margin-bottom:10px';
-    label.textContent = '📤 Carica File (PDF, immagini, documenti)';
-
-    var fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.multiple = true;
-    fileInput.accept = '.pdf,.png,.jpg,.jpeg,.txt,.docx,.xlsx';
-    fileInput.style.display = 'none';
-    label.appendChild(fileInput);
-
-    var catSel = document.createElement('select');
-    catSel.style.cssText = 'padding:8px 12px;border:1px solid var(--g200);border-radius:8px;background:var(--white);width:100%';
-    ['Appunti','Libri di Testo','Esercizi','Dispense','Altro'].forEach(function(c){
-      var opt = document.createElement('option');
-      opt.value = c; opt.textContent = c;
-      catSel.appendChild(opt);
-    });
-
-    var prog = document.createElement('div');
-    prog.style.cssText = 'margin-top:8px;font-size:.82rem;color:var(--g700);min-height:20px';
-
-    fileInput.onchange = function(){
-      var files = Array.from(fileInput.files);
-      var cat = catSel.value;
-      var done = 0;
-      prog.textContent = 'Caricamento '+files.length+' file...';
-      files.forEach(function(file){
-        var reader = new FileReader();
-        reader.onload = function(ev){
-          saveFile(file.name,cat,ev.target.result,file.type).then(function(){
-            done++;
-            if(done===files.length){
-              prog.textContent = done+' file salvati!';
-              setTimeout(function(){prog.textContent=''; renderList();},2000);
-            }
-          });
-        };
-        reader.readAsArrayBuffer(file);
-      });
-      fileInput.value = '';
-    };
-
-    uploadDiv.appendChild(label);
-    uploadDiv.appendChild(catSel);
-    uploadDiv.appendChild(prog);
-    sec.appendChild(uploadDiv);
-
-    // File list
-    var listDiv = document.createElement('div');
-    listDiv.id = 'fm-list-div';
-    sec.appendChild(listDiv);
-
-    function renderList(){
-      getAllFiles().then(function(files){
-        listDiv.innerHTML = '';
-        if(!files.length){
-          listDiv.innerHTML = '<div style="color:var(--text2);text-align:center;padding:30px;background:var(--g50);border-radius:12px">📂 Nessun file caricato.<br><small>Usa il pulsante sopra per aggiungere i tuoi appunti.</small></div>';
-          return;
-        }
-        // Group by category
-        var byCat = {};
-        files.forEach(function(f){ (byCat[f.cat]=byCat[f.cat]||[]).push(f); });
-        var total = document.createElement('div');
-        total.style.cssText = 'font-weight:700;color:var(--g900);margin-bottom:10px';
-        total.textContent = files.length+' file salvati nel browser';
-        listDiv.appendChild(total);
-
-        Object.keys(byCat).forEach(function(cat){
-          var catDiv = document.createElement('div');
-          catDiv.style.marginBottom = '14px';
-          var catTitle = document.createElement('div');
-          catTitle.style.cssText = 'font-weight:700;color:var(--g700);font-size:.85rem;text-transform:uppercase;margin-bottom:6px';
-          catTitle.textContent = '📂 '+cat;
-          catDiv.appendChild(catTitle);
-
-          byCat[cat].forEach(function(f){
-            var ext = f.name.split('.').pop().toLowerCase();
-            var icon = ext==='pdf'?'📄':ext==='png'||ext==='jpg'||ext==='jpeg'?'🖼️':ext==='docx'?'📝':'📎';
-            var size = f.size>1048576?Math.round(f.size/104857.6)/10+'MB':Math.round(f.size/1024)+'KB';
-
-            var row = document.createElement('div');
-            row.style.cssText = 'background:var(--white);border:1px solid var(--g200);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:6px';
-
-            var iconEl = document.createElement('span');
-            iconEl.style.fontSize = '1.4rem';
-            iconEl.textContent = icon;
-
-            var info = document.createElement('div');
-            info.style.cssText = 'flex:1;min-width:0';
-            info.innerHTML = '<div style="font-weight:700;color:var(--g900);font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+f.name+'</div>'
-              + '<div style="font-size:.72rem;color:var(--text2)">'+size+' · '+new Date(f.date).toLocaleDateString('it-IT')+'</div>';
-
-            var btns = document.createElement('div');
-            btns.style.cssText = 'display:flex;gap:6px;flex-shrink:0';
-
-            if(ext==='pdf'){
-              var openBtn = document.createElement('button');
-              openBtn.textContent = '👁️';
-              openBtn.title = 'Apri';
-              openBtn.style.cssText = 'background:var(--g100);border:1px solid var(--g200);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.85rem';
-              openBtn.onclick = (function(id){ return function(){ window.openStoredFile(id); }; })(f.id);
-              btns.appendChild(openBtn);
-            }
-
-            var dlBtn = document.createElement('button');
-            dlBtn.textContent = '⬇️';
-            dlBtn.title = 'Scarica';
-            dlBtn.style.cssText = 'background:var(--g900);color:#fff;border:none;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.85rem';
-            dlBtn.onclick = (function(id){ return function(){ window.downloadStoredFile(id); }; })(f.id);
-
-            var delBtn = document.createElement('button');
-            delBtn.textContent = '🗑️';
-            delBtn.title = 'Elimina';
-            delBtn.style.cssText = 'background:#ffebee;color:#c62828;border:none;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.85rem';
-            delBtn.onclick = (function(id){ return function(){
-              if(confirm('Eliminare questo file?')) deleteFileDB(id).then(renderList);
-            }; })(f.id);
-
-            btns.appendChild(dlBtn);
-            btns.appendChild(delBtn);
-            row.appendChild(iconEl);
-            row.appendChild(info);
-            row.appendChild(btns);
-            catDiv.appendChild(row);
-          });
-          listDiv.appendChild(catDiv);
-        });
-      }).catch(function(){
-        listDiv.innerHTML = '<div style="color:var(--err)">Errore accesso file. IndexedDB potrebbe non essere disponibile.</div>';
-      });
-    }
-
-    renderList();
-  };
-})();
-
-// ── CHIMICA ANALITICA II ─────────────────────────────────────────
-window.initAnalitica = function(){
-  var sec = document.getElementById('sanalitica');
-  if(!sec || sec._built) return;
-  sec._built = true;
-
-  var chapters = [
-    {id:'crom', title:'Parametri Cromatografici', items:[
-      {h:'Piatto Teorico (N, H)', t:'H = σ²/L (altezza di piatto). N = L/H = 16(tR/W)². Maggiore N → migliore separazione. Un picco cromatografico ha profilo gaussiano.'},
-      {h:'Van Deemter', t:'H = A + B/u + C·u. A: eddy diffusion (percorsi multipli). B/u: diffusione longitudinale. C·u: trasferimento di massa. Velocità ottimale: u_opt = √(B/C).'},
-      {h:'Fattore di Capacità k\'', t:'k\' = (tR−tM)/tM. Ottimale 1–10. k\' = K·Vs/Vm. Dipende da temperatura e natura delle fasi.'},
-      {h:'Selettività α e Risoluzione R', t:'α = k\'₂/k\'₁ ≥ 1. R = 2(tR₂−tR₁)/(W₁+W₂). R > 1.5 = baseline separation. R = (√N/4)·((α−1)/α)·(k\'/(1+k\')).'},
-    ]},
-    {id:'gc', title:'Gas Cromatografia (GC)', items:[
-      {h:'Principio e Volumi di Ritenzione', t:'Fase mobile: gas (N₂, He, H₂). VR = F·tR, VM = F·tM. Flusso effettivo: F = FM·(TC/T)·(P−PH₂O)/P. Due meccanismi: GLC (ripartizione) e GSC (adsorbimento).'},
-      {h:'Rivelatori GC', t:'FID: universale per organici (±H₃, fiamma). TCD: universale, conduttività termica. ECD: alogeni/nitro, ppb. NPD: N e P selettivi. FPD: S e P.'},
-      {h:'Colonne Capillari', t:'WCOT/SCOT: 0.1–0.5 mm diametro, 15–100 m lunghezza, N = 10⁵–10⁶. Fase stazionaria tipica: PDMS (apolare), PEG (polare).'},
-    ]},
-    {id:'hplc', title:'HPLC', items:[
-      {h:'Fase Inversa RP-HPLC', t:'70% delle analisi HPLC. Fase stazionaria: C18/C8 (apolare). Fase mobile: H₂O/ACN o H₂O/MeOH. Gradiente: aumenta % organico. Apolari più ritenuti.'},
-      {h:'Rivelatori HPLC', t:'UV fisso (254 nm), DAD (spettro completo), RI (universale, non per gradiente), Fluorescenza (selettivo, sensibile), MS (identificazione strutturale).'},
-      {h:'Sistema HPLC', t:'Pompe reciprocanti: 0.1–10 mL/min, 5–400 bar. Colonne: 15–25 cm × 4.6 mm, silice C18 3–5 μm. UHPLC: <2 μm, >1000 bar, più rapido.'},
-    ]},
-    {id:'spatt', title:'Spettroscopia Atomica', items:[
-      {h:'AES — Emissione Atomica', t:'A* → A + hν. Eccitazione: fiamma (2000–3000 K), ICP (6000–10000 K). ICP-AES: plasma Ar RF, multi-elemento, limiti ppb. Autoassorbimento: atomi stessi assorbono la radiazione emessa.'},
-      {h:'AAS — Assorbimento Atomico', t:'A + hν → A*. Sorgente: lampada a catodo cavo. Atomizzatori: fiamma (C₂H₂/aria, 2300 K) o fornetto grafite ETA (2000–2700 K, ppt). Correzione background: deuterio o Zeeman.'},
-      {h:'ICP-MS', t:'ICP accoppiato a MS. Sensibilità sub-ppt, multi-elemento, isotopica. Interferenze poliatomihe: ⁴⁰Ar¹⁶O⁺ su ⁵⁶Fe⁺. Ridotte con cella DRC. Standard interno: ¹⁰³Rh.'},
-    ]},
-    {id:'elett', title:'Elettrochimica', items:[
-      {h:'Equazione di Nernst', t:'E = E° − (RT/nF)·ln(Q). A 25°C: E = E° − (0.05916/n)·log(Q). Elettrodi riferimento: SCE (+0.241 V NHE), Ag/AgCl (+0.197 V NHE).'},
-      {h:'ISE — Elettrodi Iono-Selettivi', t:'Vetro pH: SiO₂ selettivo H⁺. Fluoruro: cristallo LaF₃, range 10⁻¹–10⁻⁶ M. Pendenza: ±59.16/z mV/decade. TISAB: forza ionica costante.'},
-      {h:'Voltammetria', t:'Misura corrente vs potenziale. ASV (stripping anodico): preconcentrazione + spazzamento, ppb metalli. Voltammetria ciclica: ip = 0.4463nFAC√(nFDv/RT).'},
-    ]},
-  ];
-
-  var title = document.createElement('div');
-  title.className = 'section-title';
-  title.textContent = 'Chimica Analitica II — Appunti Di Nunno (263 pag.)';
-  sec.appendChild(title);
-
-  var note = document.createElement('div');
-  note.style.cssText = 'background:var(--g50);border:1px solid var(--g200);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:.82rem;color:var(--text2)';
-  note.innerHTML = 'Contenuto estratto dagli appunti. Per il PDF completo usa la sezione <b>📁 File Manager</b>.';
-  sec.appendChild(note);
-
-  // Tab buttons
-  var tabBar = document.createElement('div');
-  tabBar.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px';
-  sec.appendChild(tabBar);
-
-  var contentDiv = document.createElement('div');
-  contentDiv.style.minHeight = '200px';
-  sec.appendChild(contentDiv);
-
-  var currentCh = null;
-  var tabBtns = {};
-
-  function showChapter(ch){
-    if(currentCh === ch.id) return;
-    currentCh = ch.id;
-    // Update tab styles
-    chapters.forEach(function(c){
-      var btn = tabBtns[c.id];
-      if(btn){
-        btn.style.background = c.id===ch.id ? 'var(--g900)' : '';
-        btn.style.color = c.id===ch.id ? '#fff' : '';
-      }
-    });
-    // Render content
-    contentDiv.innerHTML = '';
-    var grid = document.createElement('div');
-    grid.style.cssText = 'display:grid;gap:10px';
-    ch.items.forEach(function(item){
-      var panel = document.createElement('div');
-      panel.className = 'panel';
-      var ph = document.createElement('div');
-      ph.className = 'ph';
-      ph.textContent = item.h;
-      var pb = document.createElement('div');
-      pb.className = 'pb';
-      pb.style.cssText = 'font-size:.88rem;line-height:1.7;color:var(--text)';
-      pb.textContent = item.t;
-      panel.appendChild(ph);
-      panel.appendChild(pb);
-      grid.appendChild(panel);
-    });
-    contentDiv.appendChild(grid);
-  }
-
-  chapters.forEach(function(ch){
-    var btn = document.createElement('button');
-    btn.className = 'nav-btn';
-    btn.textContent = ch.title;
-    btn.onclick = (function(c){ return function(){ showChapter(c); }; })(ch);
-    tabBar.appendChild(btn);
-    tabBtns[ch.id] = btn;
-  });
-
-  showChapter(chapters[0]);
-};
-
-// ── PWA INSTALL ───────────────────────────────────────────────────
-(function(){
-  var _evt = null;
-
-  window.addEventListener('beforeinstallprompt', function(e){
-    e.preventDefault();
-    _evt = e;
-    // Make install button glow
-    var btn = document.getElementById('installBtn');
-    if(btn){
-      btn.style.background = '#fff';
-      btn.style.color = 'var(--g900)';
-      btn.style.fontWeight = '900';
-    }
-    // Show bottom banner
-    setTimeout(function(){
-      if(document.getElementById('pwa-bar')) return;
-      if(window.matchMedia('(display-mode:standalone)').matches) return;
-      var bar = document.createElement('div');
-      bar.id = 'pwa-bar';
-      bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--g900);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 -3px 20px rgba(0,0,0,.4);font-family:system-ui';
-      var left = document.createElement('div');
-      left.style.cssText = 'display:flex;align-items:center;gap:10px';
-      left.innerHTML = '<span style="font-size:1.8rem">📲</span><div><div style="font-weight:800;font-size:1rem">Installa BioSpecInfo</div><div style="font-size:.8rem;opacity:.85">App gratuita offline</div></div>';
-      var installBtn = document.createElement('button');
-      installBtn.textContent = 'Installa';
-      installBtn.style.cssText = 'background:#fff;color:var(--g900);border:none;border-radius:10px;padding:10px 24px;font-weight:900;font-size:1rem;cursor:pointer;white-space:nowrap';
-      installBtn.onclick = doInstall;
-      var closeBtn = document.createElement('button');
-      closeBtn.textContent = '✕';
-      closeBtn.style.cssText = 'background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:1rem';
-      closeBtn.onclick = function(){ bar.remove(); };
-      var rightDiv = document.createElement('div');
-      rightDiv.style.cssText = 'display:flex;gap:8px;flex-shrink:0';
-      rightDiv.appendChild(installBtn);
-      rightDiv.appendChild(closeBtn);
-      bar.appendChild(left);
-      bar.appendChild(rightDiv);
-      document.body.appendChild(bar);
-    }, 1500);
-  });
-
-  function doInstall(){
-    var bar = document.getElementById('pwa-bar');
-    if(bar) bar.remove();
-    if(_evt){
-      _evt.prompt();
-      _evt.userChoice.then(function(r){
-        if(r.outcome==='accepted') _evt = null;
-      });
-    }
-  }
-
-  window.addEventListener('appinstalled', function(){
-    var bar = document.getElementById('pwa-bar');
-    if(bar) bar.remove();
-    var btn = document.getElementById('installBtn');
-    if(btn) btn.style.display = 'none';
-    var t = document.createElement('div');
-    t.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);background:var(--g900);color:#fff;padding:12px 24px;border-radius:12px;z-index:9999;font-weight:800;font-size:1rem';
-    t.textContent = 'BioSpecInfo installata!';
-    document.body.appendChild(t);
-    setTimeout(function(){t.remove();},3500);
-  });
-
-  window.showInstallGuide = function(){
-    if(_evt){ doInstall(); return; }
-    if(window.matchMedia('(display-mode:standalone)').matches || navigator.standalone){
-      alert('App già installata!'); return;
-    }
-    var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    if(isIOS){
-      alert('iPhone/iPad:\n1. Tocca Condividi (⬆️)\n2. "Aggiungi a schermata Home"\n3. Aggiungi');
-    } else {
-      alert('Android Chrome:\n1. Apri il sito\n2. Tocca ⋮ (tre puntini)\n3. "Aggiungi a schermata Home"\n\nOppure prova a ricaricare la pagina — il banner di installazione apparirà.');
-    }
-  };
-
-  // Register SW for installability
-  if('serviceWorker' in navigator){
-    var sw = 'self.addEventListener("install",function(){self.skipWaiting();});'
-      + 'self.addEventListener("activate",function(e){self.clients.claim();});'
-      + 'self.addEventListener("fetch",function(e){e.respondWith(fetch(e.request).catch(function(){return caches.match(e.request);}));});';
-    try{
-      var blob = new Blob([sw],{type:'application/javascript'});
-      navigator.serviceWorker.register(URL.createObjectURL(blob),{scope:'./'})
-        .then(function(r){ console.log('SW ok'); })
-        .catch(function(e){ console.warn('SW:',e.message); });
-    }catch(e){}
-  }
-
-  // Inject manifest
-  try{
-    var M = {name:'BioSpecInfo',short_name:'BioSpecInfo',
-      start_url: window.location.href,
-      display:'standalone',background_color:'#1B5E20',theme_color:'#1B5E20',
-      prefer_related_applications:false,
-      icons:[{src:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAB1WlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS40LjAiPgogICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgICAgICAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyI+CiAgICAgICAgIDx0aWZmOk9yaWVudGF0aW9uPjE8L3RpZmY6T3JpZW50YXRpb24+CiAgICAgIDwvcmRmOkRlc2NyaXB0aW9uPgogICA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgpMwidZAAADe0lEQVR4Ae3BMQEAAADCoPVP7WsIoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAeAMBuAABHgAAAABJRU5ErkJggg==',
-        sizes:'144x144',type:'image/png',purpose:'any maskable'}]};
-    var mBlob = new Blob([JSON.stringify(M)],{type:'application/manifest+json'});
-    var mLink = document.createElement('link');
-    mLink.rel = 'manifest';
-    mLink.href = URL.createObjectURL(mBlob);
-    document.head.appendChild(mLink);
-  }catch(e){}
-})();
-
-</script>
 <script>
 // Fallback per sezioni vuote
 (function(){
@@ -27043,6 +26347,54 @@ window.downloadMaterial=function(type){
   var btn=document.querySelector('[data-s="'+sec+'"]');
   if(btn){btn.click();setTimeout(function(){window.print();},800);}
 };
+</script>
+<script>(function(){
+  var _evt = null;
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('./sw.js',{scope:'./'})
+      .then(function(r){console.log('SW ok');})
+      .catch(function(e){console.warn('SW:',e.message);});
+  }
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();
+    _evt = e;
+    var btn = document.getElementById('installBtn');
+    if(btn){btn.style.background='#fff';btn.style.color='var(--g900)';btn.style.fontWeight='900';btn.style.animation='bsiPulse 1.5s infinite';}
+    setTimeout(function(){
+      if(document.getElementById('pwa-bar')) return;
+      if(window.matchMedia('(display-mode:standalone)').matches) return;
+      var bar = document.createElement('div');
+      bar.id = 'pwa-bar';
+      bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#1B5E20;color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 -4px 20px rgba(0,0,0,.4);font-family:system-ui';
+      var left = document.createElement('div');
+      left.style.cssText='display:flex;align-items:center;gap:10px';
+      left.innerHTML = '<span style="font-size:1.8rem">📲</span><div><div style="font-weight:800;font-size:1rem">Installa BioSpecInfo</div><div style="font-size:.8rem;opacity:.85">App gratuita offline</div></div>';
+      var instBtn = document.createElement('button');
+      instBtn.textContent='Installa';
+      instBtn.style.cssText='background:#fff;color:#1B5E20;border:none;border-radius:10px;padding:10px 26px;font-weight:900;font-size:1rem;cursor:pointer';
+      instBtn.onclick=function(){var b=document.getElementById('pwa-bar');if(b)b.remove();if(_evt){_evt.prompt();_evt.userChoice.then(function(){_evt=null;});}};
+      var clBtn = document.createElement('button');
+      clBtn.textContent='✕';
+      clBtn.style.cssText='background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer';
+      clBtn.onclick=function(){bar.remove();};
+      var right=document.createElement('div');right.style.cssText='display:flex;gap:8px;flex-shrink:0';
+      right.appendChild(instBtn);right.appendChild(clBtn);
+      bar.appendChild(left);bar.appendChild(right);
+      document.body.appendChild(bar);
+    },1500);
+  });
+  window.addEventListener('appinstalled',function(){
+    var bar=document.getElementById('pwa-bar');if(bar)bar.remove();
+    var btn=document.getElementById('installBtn');if(btn)btn.style.display='none';
+  });
+  window.showInstallGuide = function(){
+    if(_evt){_evt.prompt();_evt.userChoice.then(function(){_evt=null;});return;}
+    if(window.matchMedia('(display-mode:standalone)').matches||navigator.standalone){alert('App gia installata');return;}
+    var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+    alert(isIOS?'iPhone: Condividi > Aggiungi a schermata Home':'Android Chrome: tre puntini > Installa app o Aggiungi a Home');
+  };
+  var st=document.createElement('style');st.textContent='@keyframes bsiPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}';document.head.appendChild(st);
+})();
 </script>
 </body>
 </html>
